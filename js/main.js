@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const navToggle = document.getElementById('nav-toggle');
     const navMenu = document.getElementById('nav-menu');
     const navLinks = document.querySelectorAll('.nav-link');
-    const newsletterForm = document.getElementById('newsletter-form');
     const currentYearEl = document.getElementById('current-year');
 
     // Update current year
@@ -63,30 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-
-    // Newsletter form handling
-    if (newsletterForm) {
-        newsletterForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = this.querySelector('input[type="email"]').value;
-
-            // Here you would typically send the email to your backend/service
-            // For now, we'll just show a success message
-
-            // Create success message
-            const successMessage = document.createElement('p');
-            successMessage.textContent = '¡Gracias por suscribirte! Te mantendré informado.';
-            successMessage.style.color = '#c9a962';
-            successMessage.style.marginTop = '1rem';
-
-            // Replace form with success message
-            this.innerHTML = '';
-            this.appendChild(successMessage);
-
-            // Log for development
-            console.log('Newsletter subscription:', email);
-        });
-    }
 
     // Intersection Observer for fade-in animations
     const observerOptions = {
