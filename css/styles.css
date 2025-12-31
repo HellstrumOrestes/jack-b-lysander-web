@@ -562,35 +562,94 @@ img {
     margin-bottom: var(--spacing-md);
 }
 
-.newsletter-form {
-    display: flex;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
+/* MailerLite Form Overrides - Dark Theme */
+.ml-embedded {
+    margin-top: var(--spacing-md);
 }
 
-.newsletter-input {
-    flex: 1;
-    padding: 0.875rem 1.25rem;
-    font-family: var(--font-body);
-    font-size: 1rem;
-    color: var(--color-text);
-    background-color: var(--color-bg);
-    border: 1px solid var(--color-border);
-    outline: none;
-    transition: border-color var(--transition-fast);
+.ml-embedded .ml-form-embedWrapper {
+    background: transparent !important;
+    border: none !important;
 }
 
-.newsletter-input::placeholder {
-    color: var(--color-text-muted);
+.ml-embedded .ml-form-embedBody {
+    background: transparent !important;
+    padding: 0 !important;
 }
 
-.newsletter-input:focus {
-    border-color: var(--color-accent);
+.ml-embedded .ml-form-formContent {
+    padding: 0 !important;
 }
 
-.newsletter-note {
-    font-size: 0.8125rem;
-    color: var(--color-text-muted);
+.ml-embedded .ml-form-fieldRow {
+    margin-bottom: var(--spacing-sm) !important;
+}
+
+.ml-embedded .ml-form-fieldRow input[type="email"] {
+    background-color: var(--color-bg) !important;
+    border: 1px solid var(--color-border) !important;
+    color: var(--color-text) !important;
+    padding: 0.875rem 1.25rem !important;
+    font-family: var(--font-body) !important;
+    font-size: 1rem !important;
+    border-radius: 0 !important;
+    transition: border-color var(--transition-fast) !important;
+}
+
+.ml-embedded .ml-form-fieldRow input[type="email"]:focus {
+    border-color: var(--color-accent) !important;
+    outline: none !important;
+}
+
+.ml-embedded .ml-form-fieldRow input[type="email"]::placeholder {
+    color: var(--color-text-muted) !important;
+}
+
+.ml-embedded .ml-form-embedSubmit button,
+.ml-embedded button[type="submit"] {
+    background-color: var(--color-accent) !important;
+    color: var(--color-bg) !important;
+    border: none !important;
+    padding: 0.875rem 2rem !important;
+    font-family: var(--font-body) !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    transition: all var(--transition-normal) !important;
+}
+
+.ml-embedded .ml-form-embedSubmit button:hover,
+.ml-embedded button[type="submit"]:hover {
+    background-color: var(--color-accent-hover) !important;
+    transform: translateY(-2px) !important;
+}
+
+.ml-embedded .ml-form-successBody {
+    color: var(--color-accent) !important;
+    font-family: var(--font-body) !important;
+}
+
+.ml-embedded .ml-form-successBody .ml-form-successContent {
+    background: transparent !important;
+    padding: var(--spacing-md) !important;
+}
+
+.ml-embedded .ml-form-successBody h4 {
+    color: var(--color-white) !important;
+    font-family: var(--font-display) !important;
+}
+
+.ml-embedded .ml-form-successBody p {
+    color: var(--color-text-light) !important;
+}
+
+/* Hide MailerLite branding if present */
+.ml-embedded .ml-form-embedPermissions,
+.ml-embedded .ml-form-embedFooter {
+    display: none !important;
 }
 
 /* Contact Section */
