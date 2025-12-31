@@ -57,21 +57,11 @@ body {
     margin-bottom: 1.5rem;
 }
 
-.hub-avatar {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--color-bg-secondary), var(--color-bg));
-    border: 2px solid var(--color-accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.hub-logo {
+    width: 120px;
+    height: 120px;
     margin: 0 auto 1rem;
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--color-accent);
-    letter-spacing: 0.05em;
+    object-fit: contain;
 }
 
 .hub-name {
