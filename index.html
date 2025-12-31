@@ -141,17 +141,24 @@
     </section>
 
     <!-- Newsletter Section -->
-    <section class="section newsletter">
+    <section class="section newsletter" id="newsletter">
         <div class="container">
             <div class="newsletter-content">
-                <h2 class="newsletter-title">Mantente al día</h2>
+                <div class="newsletter-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </div>
+                <h2 class="newsletter-title">Únete a mi lista de correo</h2>
                 <p class="newsletter-text">
-                    Suscríbete para recibir noticias sobre nuevas publicaciones,
-                    eventos y contenido exclusivo.
+                    Sé el primero en conocer mis nuevas publicaciones, eventos exclusivos
+                    y contenido que no comparto en ningún otro lugar.
                 </p>
-                <form class="newsletter-form" id="newsletter-form">
+                <form class="newsletter-form" id="newsletter-form" action="#" method="POST">
                     <input
                         type="email"
+                        name="email"
                         placeholder="Tu correo electrónico"
                         class="newsletter-input"
                         required
@@ -159,7 +166,7 @@
                     <button type="submit" class="btn btn-primary">Suscribirse</button>
                 </form>
                 <p class="newsletter-note">
-                    Respeto tu privacidad. Nada de spam, solo contenido relevante.
+                    Sin spam. Solo contenido relevante. Puedes darte de baja cuando quieras.
                 </p>
             </div>
         </div>
@@ -193,22 +200,36 @@
                 <div class="contact-social">
                     <p>También puedes encontrarme en:</p>
                     <div class="social-links">
-                        <!-- Add your social media links here -->
-                        <a href="#" class="social-link" aria-label="Twitter/X" title="Twitter/X">
+                        <a href="https://x.com/jack_b_lysander" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="X (Twitter)" title="X (Twitter)">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                             </svg>
                         </a>
-                        <a href="#" class="social-link" aria-label="Instagram" title="Instagram">
+                        <a href="https://www.instagram.com/jack.b.lysander/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram" title="Instagram">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                             </svg>
                         </a>
-                        <a href="#" class="social-link" aria-label="Goodreads" title="Goodreads">
+                        <a href="https://www.youtube.com/@JackB.Lysander" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="YouTube" title="YouTube">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12.01 2.5c-3.59 0-6.5 2.91-6.5 6.5 0 2.62 1.56 4.87 3.8 5.89v5.86c0 .41.34.75.75.75h3.9c.41 0 .75-.34.75-.75v-5.86c2.24-1.02 3.8-3.27 3.8-5.89 0-3.59-2.91-6.5-6.5-6.5zm1.7 11.15v6.1h-3.4v-6.1c-1.78-.65-3.05-2.34-3.05-4.35 0-2.55 2.07-4.62 4.62-4.62s4.62 2.07 4.62 4.62c0 2.01-1.27 3.7-3.05 4.35z"/>
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.tiktok.com/@jackb.lysander" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="TikTok" title="TikTok">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=61560117425298" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook" title="Facebook">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.goodreads.com/user/show/189865083-jack-b" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Goodreads" title="Goodreads">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M11.43 23.995c-3.608-.208-6.274-2.077-6.448-5.078.695.007 1.375-.013 2.07-.006.224 1.342 1.065 2.43 2.683 3.026 1.583.496 3.737.46 5.082-.174 1.351-.636 2.145-1.822 2.503-3.577.212-1.042.236-1.734.238-2.858-.437.744-1.136 1.318-1.878 1.708-1.295.682-2.985.969-4.592.755-2.34-.31-4.238-1.603-5.39-3.685-.963-1.74-1.203-4.315-.741-6.381.692-3.099 2.87-5.252 5.896-5.987 1.596-.388 3.452-.229 4.94.345.754.29 1.467.747 1.929 1.148V.947h2.27v14.196c0 2.343-.354 4.108-1.058 5.297-1.132 1.911-3.392 3.263-6.275 3.513-.495.043-.994.061-1.229.042zm.601-6.534c2.464-.184 4.193-1.773 4.714-4.349.265-1.312.261-2.773-.07-4.078-.533-2.101-2.074-3.593-4.274-3.962-1.57-.264-3.252.058-4.441.976-1.366 1.054-2.064 2.601-2.116 4.549-.039 1.456.26 2.837.896 3.949.856 1.495 2.346 2.57 4.156 2.838.37.054.755.078 1.135.077z"/>
                             </svg>
                         </a>
                     </div>
