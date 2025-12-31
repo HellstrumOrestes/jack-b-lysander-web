@@ -1,9 +1,7 @@
 /* ========================================
-   Jack B. Lysander - Hub Page
-   Simple, elegant link hub
+   Jack B. Lysander - Writer Website
    ======================================== */
 
-/* CSS Variables */
 :root {
     --color-bg: #0a0a0a;
     --color-bg-secondary: #111111;
@@ -18,10 +16,7 @@
     --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Reset */
-*,
-*::before,
-*::after {
+*, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -41,7 +36,10 @@ body {
     min-height: 100vh;
 }
 
-/* Hub Container */
+/* ========================================
+   Hub Page (index.html)
+   ======================================== */
+
 .hub {
     min-height: 100vh;
     display: flex;
@@ -56,21 +54,21 @@ body {
 /* Profile */
 .hub-profile {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .hub-avatar {
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--color-bg-secondary), var(--color-bg));
     border: 2px solid var(--color-accent);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 1.25rem;
+    margin: 0 auto 1rem;
     font-family: var(--font-display);
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: var(--color-accent);
     letter-spacing: 0.05em;
@@ -78,75 +76,107 @@ body {
 
 .hub-name {
     font-family: var(--font-display);
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 600;
     color: var(--color-white);
     letter-spacing: 0.02em;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.125rem;
 }
 
 .hub-tagline {
     font-family: var(--font-display);
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-style: italic;
     color: var(--color-text-muted);
 }
 
-/* Links */
-.hub-links {
-    width: 100%;
+/* Social Icons Row */
+.hub-social {
     display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 2.5rem;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
 }
 
-.hub-link {
+.hub-social a {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
-    padding: 1rem 1.5rem;
-    background-color: var(--color-bg-secondary);
+    width: 44px;
+    height: 44px;
+    color: var(--color-text-muted);
     border: 1px solid var(--color-border);
-    color: var(--color-text);
-    text-decoration: none;
-    font-size: 0.9375rem;
-    font-weight: 400;
+    border-radius: 50%;
     transition: all 0.25s ease;
 }
 
-.hub-link:hover {
-    border-color: var(--color-accent);
+.hub-social a:hover {
     color: var(--color-accent);
+    border-color: var(--color-accent);
     transform: translateY(-2px);
-}
-
-.hub-link svg {
-    flex-shrink: 0;
-}
-
-.hub-link-email {
-    margin-top: 0.5rem;
 }
 
 /* Newsletter */
 .hub-newsletter {
     width: 100%;
     text-align: center;
-    padding: 1.5rem;
+    padding: 1.25rem;
     background-color: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .hub-newsletter-text {
     font-size: 0.875rem;
     color: var(--color-text-muted);
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 }
 
-/* MailerLite Form Overrides */
+/* Navigation Buttons */
+.hub-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.hub-btn {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    color: var(--color-text);
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    transition: all 0.25s ease;
+}
+
+.hub-btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+/* Hub Footer */
+.hub-footer {
+    text-align: center;
+}
+
+.hub-footer p {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+/* ========================================
+   MailerLite Form Overrides
+   ======================================== */
+
 .ml-embedded {
     width: 100%;
 }
@@ -166,27 +196,35 @@ body {
 }
 
 .ml-embedded .ml-form-fieldRow {
-    margin-bottom: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
 }
 
-.ml-embedded .ml-form-fieldRow input[type="email"] {
+.ml-embedded .ml-form-fieldRow input[type="email"],
+.ml-embedded .ml-form-fieldRow input[type="text"] {
     background-color: var(--color-bg) !important;
     border: 1px solid var(--color-border) !important;
     color: var(--color-text) !important;
     padding: 0.75rem 1rem !important;
     font-family: var(--font-body) !important;
-    font-size: 0.9375rem !important;
+    font-size: 0.875rem !important;
     border-radius: 0 !important;
     width: 100% !important;
 }
 
-.ml-embedded .ml-form-fieldRow input[type="email"]:focus {
+.ml-embedded .ml-form-fieldRow input:focus {
     border-color: var(--color-accent) !important;
     outline: none !important;
 }
 
-.ml-embedded .ml-form-fieldRow input[type="email"]::placeholder {
+.ml-embedded .ml-form-fieldRow input::placeholder {
     color: var(--color-text-muted) !important;
+}
+
+/* Force light text on MailerLite labels */
+.ml-embedded label,
+.ml-embedded .ml-form-formContent label,
+.ml-embedded .ml-form-fieldRow label {
+    color: var(--color-text) !important;
 }
 
 .ml-embedded .ml-form-embedSubmit button,
@@ -203,7 +241,7 @@ body {
     border-radius: 0 !important;
     cursor: pointer !important;
     width: 100% !important;
-    transition: all 0.25s ease !important;
+    transition: background-color 0.25s ease !important;
 }
 
 .ml-embedded .ml-form-embedSubmit button:hover,
@@ -212,8 +250,7 @@ body {
 }
 
 .ml-embedded .ml-form-successBody {
-    color: var(--color-accent) !important;
-    font-family: var(--font-body) !important;
+    color: var(--color-text) !important;
 }
 
 .ml-embedded .ml-form-successBody h4 {
@@ -230,23 +267,125 @@ body {
     display: none !important;
 }
 
-/* Footer */
-.hub-footer {
-    text-align: center;
+/* ========================================
+   Subpages (libros.html, sobre-mi.html)
+   ======================================== */
+
+.page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-.hub-footer p {
-    font-size: 0.8125rem;
+.back-link {
+    display: inline-block;
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    margin-bottom: 2rem;
+    transition: color 0.25s ease;
+}
+
+.back-link:hover {
+    color: var(--color-accent);
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.page-title {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--color-white);
+    letter-spacing: 0.02em;
+    margin-bottom: 0.75rem;
+}
+
+.page-divider {
+    width: 40px;
+    height: 1px;
+    background-color: var(--color-accent);
+    margin: 0 auto;
+}
+
+.page-content {
+    flex: 1;
+}
+
+/* Coming Soon (Libros) */
+.coming-soon {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background-color: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.coming-soon svg {
+    color: var(--color-accent);
+    margin-bottom: 1.5rem;
+    opacity: 0.7;
+}
+
+.coming-soon h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--color-white);
+    margin-bottom: 0.75rem;
+}
+
+.coming-soon p {
+    color: var(--color-text-muted);
+    font-size: 0.9375rem;
+}
+
+/* About Text (Sobre mí) */
+.about-text {
+    color: var(--color-text);
+}
+
+.about-text p {
+    margin-bottom: 1.25rem;
+    font-size: 1rem;
+    line-height: 1.8;
+}
+
+.about-text .signature {
+    margin-top: 2rem;
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-style: italic;
+    color: var(--color-accent);
+}
+
+/* Page Footer */
+.page-footer {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.page-footer p {
+    font-size: 0.75rem;
     color: var(--color-text-muted);
 }
 
-/* Selection */
+/* ========================================
+   Utilities
+   ======================================== */
+
 ::selection {
     background-color: var(--color-accent);
     color: var(--color-bg);
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -261,4 +400,24 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--color-accent);
+}
+
+/* ========================================
+   Mobile Responsive
+   ======================================== */
+
+@media (max-width: 480px) {
+    .hub-social {
+        gap: 0.75rem;
+    }
+
+    .hub-social a {
+        width: 40px;
+        height: 40px;
+    }
+
+    .hub-social a svg {
+        width: 18px;
+        height: 18px;
+    }
 }
