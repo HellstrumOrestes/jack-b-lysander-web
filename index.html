@@ -3,31 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Jack B. Lysander - Escritor. Descubre mis obras y acompáñame en este viaje literario.">
+    <meta name="description" content="Jack B. Lysander - Escritor. Historias que transforman, hacen sentir y transportan a mundos donde todo es posible.">
     <meta name="author" content="Jack B. Lysander">
 
+    <!-- Open Graph -->
     <meta property="og:title" content="Jack B. Lysander - Escritor">
-    <meta property="og:description" content="Escritor. Descubre mis obras y acompáñame en este viaje literario.">
+    <meta property="og:description" content="Historias que transforman, hacen sentir y transportan a mundos donde todo es posible.">
     <meta property="og:type" content="website">
+    <meta property="og:image" content="logo.png">
+    <meta property="og:locale" content="es_ES">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Jack B. Lysander - Escritor">
+    <meta name="twitter:description" content="Historias que transforman, hacen sentir y transportan a mundos donde todo es posible.">
+    <meta name="twitter:image" content="logo.png">
+    <meta name="twitter:creator" content="@jack_b_lysander">
 
     <title>Jack B. Lysander | Escritor</title>
 
     <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Jack B. Lysander",
+        "jobTitle": "Escritor",
+        "description": "Historias que transforman, hacen sentir y transportan a mundos donde todo es posible.",
+        "image": "logo.png",
+        "sameAs": [
+            "https://x.com/jack_b_lysander",
+            "https://www.instagram.com/jack.b.lysander/",
+            "https://www.youtube.com/@JackB.Lysander",
+            "https://www.tiktok.com/@jackb.lysander",
+            "https://www.facebook.com/profile.php?id=61560117425298",
+            "https://www.goodreads.com/user/show/189865083-jack-b"
+        ]
+    }
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="preload" href="logo-transparent.png" as="image">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="css/styles.css">
-
-    <!-- MailerLite Universal -->
-    <script>
-        (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
-        .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
-        n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
-        (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
-        ml('account', '2010641');
-    </script>
 </head>
 <body>
     <main class="hub">
@@ -82,14 +105,29 @@
 
         <!-- Newsletter -->
         <div class="hub-newsletter">
-            <p class="hub-newsletter-text">Suscríbete para novedades</p>
+            <p class="hub-newsletter-text">Recibe adelantos exclusivos y novedades directamente en tu correo</p>
             <div class="ml-embedded" data-form="5mi1S6"></div>
         </div>
 
         <!-- Footer -->
         <footer class="hub-footer">
-            <p>&copy; 2025 Jack B. Lysander</p>
+            <p>&copy; <span class="current-year">2025</span> Jack B. Lysander</p>
         </footer>
     </main>
+
+    <!-- MailerLite Universal -->
+    <script>
+        (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
+        .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
+        n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
+        (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+        ml('account', '2010641');
+    </script>
+
+    <script>
+        document.querySelectorAll('.current-year').forEach(function(el) {
+            el.textContent = new Date().getFullYear();
+        });
+    </script>
 </body>
 </html>
