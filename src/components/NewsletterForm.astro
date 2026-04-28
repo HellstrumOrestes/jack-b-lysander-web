@@ -1,0 +1,110 @@
+---
+// Formulario de suscripción a la newsletter (Buttondown).
+// Sin JavaScript propio, sin claves API. Buttondown gestiona la suscripción
+// y el double opt-in del lado servidor. Es el embed público oficial.
+//
+// Props:
+//   - title: titular del bloque (opcional)
+//   - description: texto secundario (opcional)
+//   - compact: variante reducida para final de capítulo (opcional)
+interface Props {
+  title?: string;
+  description?: string;
+  compact?: boolean;
+}
+const {
+  title = 'Suscríbete a la newsletter',
+  description = 'Aviso por email cuando publico un capítulo nuevo. Sin spam.',
+  compact = false,
+} = Astro.props;
+---
+
+<form
+  action="https://buttondown.com/api/emails/embed-subscribe/jack_b_lysander"
+  method="post"
+  target="popupwindow"
+  onsubmit="window.open('https://buttondown.com/jack_b_lysander', 'popupwindow')"
+  class={`newsletter-form ${compact ? 'compact' : ''}`}
+>
+  <label for="bd-email">{title}</label>
+  <p class="newsletter-desc">{description}</p>
+  <div class="newsletter-row">
+    <input
+      type="email"
+      name="email"
+      id="bd-email"
+      placeholder="tu@email.com"
+      required
+      autocomplete="email"
+    />
+    <button type="submit">Suscribirme</button>
+  </div>
+</form>
+
+<style>
+  .newsletter-form {
+    background-color: var(--color-bg-soft);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 1.5rem 1.5rem 1.25rem;
+    margin: var(--space-lg) auto;
+    max-width: var(--measure);
+    font-family: var(--font-sans);
+  }
+  .newsletter-form.compact {
+    padding: 1.1rem 1.25rem 1rem;
+  }
+  .newsletter-form label {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 0.25rem;
+  }
+  .newsletter-desc {
+    margin: 0 0 0.9rem;
+    font-size: 0.92rem;
+    color: var(--color-text-soft);
+  }
+  .newsletter-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .newsletter-form input[type='email'] {
+    flex: 1 1 220px;
+    min-width: 0;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    border-radius: 3px;
+    color: var(--color-text);
+  }
+  .newsletter-form input[type='email']:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+    border-color: var(--color-accent);
+  }
+  .newsletter-form button {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.6rem 1.1rem;
+    background-color: var(--color-accent);
+    color: #fff;
+    border: 1px solid var(--color-accent);
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .newsletter-form button:hover {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+  }
+  @media (max-width: 480px) {
+    .newsletter-row { flex-direction: column; }
+    .newsletter-form button { width: 100%; }
+  }
+</style>

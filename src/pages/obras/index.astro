@@ -1,0 +1,36 @@
+---
+// Página índice de todas las obras.
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ObraCard from '../../components/ObraCard.astro';
+
+const obras = (await getCollection('obras')).sort((a, b) => {
+  const oa = a.data.orden ?? 999;
+  const ob = b.data.orden ?? 999;
+  if (oa !== ob) return oa - ob;
+  return b.data.fecha_inicio.getTime() - a.data.fecha_inicio.getTime();
+});
+---
+
+<BaseLayout title="Obras" description="Listado de obras de Jack B. Lysander.">
+  <h1>Obras</h1>
+  <p class="text-soft intro">
+    Todas las obras publicadas, en publicación o en pausa.
+  </p>
+
+  {obras.length === 0 ? (
+    <p class="text-soft">Aún no hay obras publicadas.</p>
+  ) : (
+    <div class="obras-list">
+      {obras.map((obra) => <ObraCard obra={obra} />)}
+    </div>
+  )}
+</BaseLayout>
+
+<style>
+  h1 { text-align: center; }
+  .intro {
+    text-align: center;
+    margin-bottom: var(--space-md);
+  }
+</style>

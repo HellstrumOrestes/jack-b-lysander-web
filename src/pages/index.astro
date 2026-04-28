@@ -1,0 +1,80 @@
+---
+// Home: nombre, subtítulo, bio breve, lista de obras y newsletter.
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
+import ObraCard from '../components/ObraCard.astro';
+
+const obras = (await getCollection('obras')).sort((a, b) => {
+  // Por orden manual si está, si no por fecha de inicio descendente
+  const oa = a.data.orden ?? 999;
+  const ob = b.data.orden ?? 999;
+  if (oa !== ob) return oa - ob;
+  return b.data.fecha_inicio.getTime() - a.data.fecha_inicio.getTime();
+});
+---
+
+<BaseLayout
+  title="Jack B. Lysander"
+  rawTitle
+  description="Ficción serializada en español por Jack B. Lysander."
+>
+  <section class="hero">
+    <h1>Jack B. Lysander</h1>
+    <p class="subtitle">Ficción serializada en español</p>
+    <div class="bio">
+      <p>
+        Bienvenidos. Aquí publico ficción capítulo a capítulo,
+        sin prisa y sin ruido. Si te gusta lo que lees, suscríbete
+        a la newsletter para recibir cada nuevo capítulo en tu correo.
+      </p>
+    </div>
+  </section>
+
+  <section class="obras-section">
+    <h2>Obras</h2>
+    {obras.length === 0 ? (
+      <p class="text-soft">Aún no hay obras publicadas.</p>
+    ) : (
+      <div class="obras-list">
+        {obras.map((obra) => <ObraCard obra={obra} />)}
+      </div>
+    )}
+  </section>
+
+  <NewsletterForm />
+</BaseLayout>
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 1.5rem 0 2rem;
+  }
+  .hero h1 {
+    margin-bottom: 0.25rem;
+    font-size: 2.8rem;
+  }
+  .subtitle {
+    font-family: var(--font-sans);
+    color: var(--color-text-soft);
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .bio {
+    max-width: var(--measure);
+    margin: 0 auto;
+  }
+  .obras-section {
+    margin-top: var(--space-lg);
+  }
+  .obras-section h2 {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 2.2rem; }
+  }
+</style>

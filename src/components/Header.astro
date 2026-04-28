@@ -1,0 +1,80 @@
+---
+// Cabecera del sitio: nombre del autor + navegación mínima.
+const { pathname } = Astro.url;
+const isActive = (href: string) => pathname === href || pathname.startsWith(href);
+---
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="brand" aria-label="Jack B. Lysander - Inicio">
+      <img src="/logo-transparent.png" alt="" class="brand-logo" width="36" height="36" />
+      <span class="brand-name">Jack B. Lysander</span>
+    </a>
+    <nav aria-label="Navegación principal">
+      <ul>
+        <li><a href="/obras/" class={isActive('/obras') ? 'active' : ''}>Obras</a></li>
+        <li><a href="/sobre/" class={isActive('/sobre') ? 'active' : ''}>Sobre</a></li>
+        <li><a href="/rss.xml">RSS</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-bg);
+  }
+  .header-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--color-text);
+  }
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+  }
+  .brand-name {
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1.4rem;
+  }
+  nav a {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    color: var(--color-text-soft);
+    text-decoration: none;
+  }
+  nav a:hover,
+  nav a.active {
+    color: var(--color-accent);
+  }
+  @media (max-width: 480px) {
+    .header-inner {
+      padding: 1rem 1rem;
+    }
+    nav ul { gap: 1rem; }
+    .brand-name { font-size: 1.05rem; }
+  }
+</style>

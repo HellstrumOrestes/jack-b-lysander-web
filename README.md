@@ -1,0 +1,426 @@
+# jackblysander.com
+
+Sitio web personal de **Jack B. Lysander**. Ficción serializada en español.
+
+Construido con [Astro](https://astro.build), desplegado en GitHub Pages,
+con dominio personalizado `jackblysander.com`.
+
+---
+
+## Requisitos en tu máquina
+
+Solo necesitas dos cosas:
+
+1. **Node.js 20 o superior** (recomendado 22). Para comprobarlo:
+   ```bash
+   node --version
+   ```
+   Si no lo tienes o tu versión es menor, descárgalo desde
+   <https://nodejs.org> (instala la versión "LTS").
+
+2. **Git**. Para comprobarlo:
+   ```bash
+   git --version
+   ```
+
+No hace falta instalar nada de forma global aparte de eso.
+
+---
+
+## Correr el sitio en local
+
+Desde la carpeta del proyecto:
+
+```bash
+npm install      # solo la primera vez
+npm run dev      # arranca el servidor de desarrollo
+```
+
+Abre <http://localhost:4321/> en el navegador. Cualquier cambio que guardes
+en un archivo `.md` o `.astro` se refleja al instante sin necesidad de
+recargar.
+
+Para parar el servidor: `Ctrl + C` en la terminal.
+
+---
+
+## Cómo añadir un capítulo nuevo
+
+1. Abre la carpeta del proyecto en VS Code (o tu editor favorito).
+2. Ve a `src/content/capitulos/<slug-de-la-obra>/`. Por ejemplo, para
+   *Samantha Solstice*: `src/content/capitulos/samantha-solstice/`.
+3. Crea un archivo nuevo siguiendo este patrón de nombre:
+   ```
+   <numero-con-cero>-<titulo-en-minusculas-con-guiones>.md
+   ```
+   Ejemplo: `03-el-libro-azul.md`.
+
+   **Importante**: el número siempre con cero a la izquierda hasta el 99
+   (`01`, `02`, …, `09`, `10`, `11`, …). Esto mantiene los archivos
+   ordenados visualmente en el editor.
+
+4. El archivo tiene que empezar por el bloque de metadatos (frontmatter)
+   y luego el texto del capítulo en Markdown:
+
+   ```markdown
+   ---
+   titulo: "El libro azul"
+   numero: 3
+   obra: "samantha-solstice"
+   fecha: 2026-05-12
+   sinopsis: "Frase corta y opcional para el índice de la obra."
+   borrador: false
+   ---
+
+   Aquí va el cuerpo del capítulo, en Markdown normal.
+
+   Un párrafo nuevo se separa con una línea en blanco.
+
+   *Cursiva* y **negrita** se escriben así.
+
+   > Las citas largas se escriben con este símbolo al principio.
+   ```
+
+5. Guarda el archivo. Si quieres dejarlo a medias sin que se publique,
+   pon `borrador: true` en el frontmatter; mientras esté en `true`, el
+   capítulo no aparecerá en la web ni en el RSS.
+
+6. Comprueba en local que se ve bien:
+   ```bash
+   npm run dev
+   ```
+   y entra a `http://localhost:4321/obras/samantha-solstice/`.
+
+7. Cuando esté listo, súbelo:
+   ```bash
+   git add src/content/capitulos/samantha-solstice/03-el-libro-azul.md
+   git commit -m "Capítulo 3 de Samantha Solstice: El libro azul"
+   git push
+   ```
+
+8. En 1-2 minutos GitHub Actions habrá rebuild y publicado en
+   `jackblysander.com`. Puedes ver el progreso en la pestaña
+   *Actions* del repositorio en GitHub.
+
+---
+
+## Cómo añadir una obra nueva
+
+1. Crea el archivo de la obra:
+   `src/content/obras/<slug-de-la-obra>.md`.
+
+   El **slug** es el identificador en URL: en minúsculas, sin acentos
+   ni espacios, con guiones. Ejemplo: `samantha-solstice`, `jane`,
+   `los-trenes-de-medianoche`. **El nombre del archivo es el slug**
+   — no necesitas declararlo en el frontmatter.
+
+2. Pega este frontmatter y rellénalo:
+
+   ```markdown
+   ---
+   titulo: "Título de la obra"
+   sinopsis_corta: "Una sola línea para la home y el listado de obras."
+   sinopsis_larga: |
+     Aquí puedes escribir varios párrafos. Esta sinopsis aparece en la
+     página propia de la obra.
+
+     Para hacer un párrafo nuevo, deja una línea en blanco igual que en
+     cualquier Markdown.
+   genero: "Fantasía contemporánea"
+   estado: "En publicación"   # o "Completa", "En pausa"
+   fecha_inicio: 2026-04-28
+   imagen_portada: "/images/mi-portada.jpg"   # OPCIONAL — borra la línea si no hay
+   orden: 1   # OPCIONAL — controla el orden de aparición en home/listado
+   ---
+   ```
+
+3. Crea la carpeta para sus capítulos:
+   `src/content/capitulos/<slug-de-la-obra>/`. Empieza con el primer
+   capítulo (`01-...md`) siguiendo las instrucciones de la sección
+   anterior.
+
+4. Si quieres añadir imagen de portada, pon el archivo en
+   `public/images/` (crea la carpeta si no existe) y referéncialo en
+   `imagen_portada` con la ruta absoluta `/images/archivo.jpg`.
+
+5. Sube los cambios con `git add`, `git commit`, `git push` igual que
+   con un capítulo.
+
+---
+
+## Validación: por qué a veces el build falla
+
+El proyecto usa **Astro Content Collections** con validación estricta.
+Si algún archivo `.md` tiene el frontmatter mal escrito, el build
+fallará con un mensaje del tipo:
+
+```
+[InvalidFrontmatter] capitulos → samantha-solstice/03-el-libro-azul.md
+  fecha: Expected date, received string
+```
+
+Errores típicos y cómo arreglarlos:
+
+- **Fecha mal escrita** → `fecha: 2026-05-12` (sin comillas, formato
+  AAAA-MM-DD).
+- **Falta un campo obligatorio** → revisa que estén `titulo`, `numero`,
+  `obra`, `fecha`.
+- **`obra:` no coincide con ningún slug** → tiene que ser exactamente
+  igual que el `slug` del archivo en `src/content/obras/`.
+- **Comillas raras** → si copias y pegas de Word o Notion, a veces
+  vienen comillas tipográficas («"», «"») que rompen el frontmatter.
+  Sustitúyelas por comillas rectas (`"`).
+
+---
+
+## Deployment automático a GitHub Pages
+
+Cada vez que haces `git push` a la rama `main`:
+
+1. GitHub detecta el push.
+2. Se ejecuta el workflow de `.github/workflows/deploy.yml`.
+3. Instala dependencias, hace `npm run build`, y publica `dist/` en
+   GitHub Pages.
+4. En 1-2 minutos, los cambios están en `https://jackblysander.com`.
+
+No tienes que hacer nada manual. Si quieres ver el estado de un
+deployment, entra a la pestaña **Actions** del repositorio en GitHub.
+
+Si el build falla, recibirás un email de GitHub con el log. Lo más
+probable es un frontmatter mal escrito (ver sección anterior).
+
+---
+
+## Configuración inicial (una sola vez)
+
+Esto solo lo haces la primera vez que pones el repositorio en marcha.
+Si ya está todo activo, sáltatelo.
+
+### 1. Crear el repositorio en GitHub
+
+Si lo creas desde cero:
+
+1. Entra a <https://github.com/new>.
+2. Nombre del repositorio: `jack-b-lysander-web` (o el que quieras).
+3. Visibilidad: pública (GitHub Pages funciona en repos privados
+   también, pero solo con cuenta de pago).
+4. **No** añadas README ni `.gitignore` ni licencia desde la interfaz
+   web — ya están en este proyecto.
+
+### 2. Subir el código
+
+Desde la carpeta local del proyecto:
+
+```bash
+git remote add origin https://github.com/<tu-usuario>/jack-b-lysander-web.git
+git branch -M main
+git push -u origin main
+```
+
+(Si ya tienes el `origin` configurado, sáltate el primer comando.)
+
+### 3. Activar GitHub Pages en el repositorio
+
+1. En GitHub, abre el repo.
+2. Ve a **Settings** → **Pages** (en el menú lateral izquierdo).
+3. En **Build and deployment** → **Source**, elige
+   **GitHub Actions**.
+4. Guarda. No hace falta tocar nada más en esa pantalla; el workflow
+   ya está incluido en el código (`.github/workflows/deploy.yml`).
+5. Vuelve a la pestaña **Actions** del repo. Deberías ver un workflow
+   en marcha. Espera 1-2 minutos a que termine.
+
+Cuando termine sin errores, el sitio estará vivo en
+`https://<tu-usuario>.github.io/jack-b-lysander-web/`. **Esto es
+temporal**: en el siguiente paso lo conectamos al dominio de verdad.
+
+### 4. Configurar el dominio personalizado en GitHub
+
+1. **Settings** → **Pages** → **Custom domain**.
+2. Escribe `jackblysander.com` y dale a **Save**.
+3. GitHub te dirá *"DNS check unsuccessful"* en rojo. Es normal: aún
+   no hemos configurado los DNS. Pasa al paso 5.
+
+### 5. Configurar los DNS en WordPress.com
+
+Recuerda: WordPress.com solo está actuando de **registrador** del
+dominio. No vas a tocar nada del sitio WordPress, solo los DNS.
+
+1. Entra a tu cuenta de WordPress.com.
+2. **Mis Sitios** → **Upgrades** → **Domains** (o
+   `https://wordpress.com/domains/manage/`).
+3. Haz clic sobre `jackblysander.com`.
+4. Busca **DNS records** o **Name Servers and DNS** → **DNS records**.
+
+Vas a añadir **5 registros**: 4 de tipo A para el dominio raíz, y 1
+CNAME para `www`.
+
+#### Registros A (apuntan al dominio raíz `jackblysander.com`)
+
+Añade los siguientes 4 registros A. En el campo "Name" / "Host" déjalo
+**vacío** o pon `@` (depende de la interfaz de WordPress.com — si
+ofrece la opción de "raíz" o "apex", úsala).
+
+| Tipo | Name | Value           | TTL   |
+|------|------|-----------------|-------|
+| A    | @    | 185.199.108.153 | 3600  |
+| A    | @    | 185.199.109.153 | 3600  |
+| A    | @    | 185.199.110.153 | 3600  |
+| A    | @    | 185.199.111.153 | 3600  |
+
+(Estas son las IPs oficiales de GitHub Pages. Las cuatro son
+necesarias para tener redundancia.)
+
+#### Registro CNAME (para `www.jackblysander.com`)
+
+| Tipo  | Name | Value                       | TTL   |
+|-------|------|-----------------------------|-------|
+| CNAME | www  | <tu-usuario>.github.io.     | 3600  |
+
+(Sustituye `<tu-usuario>` por tu nombre de usuario de GitHub. **El
+punto al final es importante** en muchas interfaces, aunque algunas
+lo añaden solas.)
+
+#### Si WordPress.com tiene registros antiguos
+
+Antes de añadir los nuevos, **borra** cualquier registro A existente
+sobre el dominio raíz que apunte a IPs de WordPress (`192.0.78.x` o
+similares), y borra el CNAME de `www` si lo había. Si no, los DNS
+estarán "duplicados" y la web seguirá yendo al WordPress viejo.
+
+**No toques** los registros MX (correo) si los tienes — esos son para
+el email del dominio y no tienen nada que ver con la web.
+
+### 6. Esperar la propagación
+
+Los cambios de DNS tardan en propagarse. Esperar:
+
+- **Mejor caso**: 5-15 minutos.
+- **Caso típico**: 1-2 horas.
+- **Peor caso**: hasta 24-48 horas.
+
+Para comprobar si ha propagado, en la terminal:
+
+```bash
+dig jackblysander.com +short
+```
+
+Cuando devuelva las cuatro IPs `185.199.108.153`, `185.199.109.153`,
+`185.199.110.153`, `185.199.111.153`, ya está. Antes de eso, no.
+
+### 7. Activar HTTPS
+
+Una vez los DNS han propagado:
+
+1. Vuelve a **Settings** → **Pages** del repositorio en GitHub.
+2. Verás que el aviso rojo de "DNS check unsuccessful" ahora es verde.
+3. Espera unos minutos (GitHub pide automáticamente un certificado
+   Let's Encrypt). Cuando esté listo, marca la casilla
+   **Enforce HTTPS**.
+
+A partir de aquí, `https://jackblysander.com` funciona con
+certificado válido.
+
+---
+
+## Errores típicos al configurar el dominio
+
+- **"DNS check unsuccessful" no se va.** Aún no ha propagado, o has
+  dejado registros A antiguos sin borrar. Espera más, y revisa con
+  `dig` que solo aparezcan las IPs de GitHub.
+
+- **El sitio sigue mostrando el WordPress antiguo.** Caché del
+  navegador o DNS local cacheado. Prueba en modo incógnito o desde
+  el móvil con datos.
+
+- **HTTPS no se activa.** Le toma a GitHub hasta una hora generar el
+  certificado tras detectar los DNS correctos. Si después de unas
+  horas sigue sin funcionar, en **Settings → Pages** desmarca y
+  vuelve a marcar **Enforce HTTPS**, o reescribe el dominio
+  personalizado y guarda otra vez. Esto fuerza que GitHub vuelva a
+  pedir el certificado.
+
+- **`www.jackblysander.com` no carga.** Falta el CNAME de `www`, o
+  está mal escrito. Debe apuntar a `<tu-usuario>.github.io.` (con el
+  punto final) y NO a `jackblysander.com`.
+
+- **El build falla en GitHub Actions.** Casi siempre es un
+  frontmatter mal escrito en un `.md`. El log de Actions te dice qué
+  archivo y qué campo. Arréglalo en local, comprueba con `npm run
+  build` que ya no falla, y vuelve a hacer push.
+
+- **Has cambiado el dominio en Settings → Pages y se borra el
+  archivo `CNAME`.** GitHub a veces elimina el archivo `public/CNAME`
+  cuando reescribes el dominio en la interfaz. Si pasa, vuelve a
+  crear el archivo `public/CNAME` con el contenido `jackblysander.com`
+  y haz push.
+
+---
+
+## Resumen del flujo de publicación habitual
+
+Ya con todo configurado, publicar un capítulo nuevo es esto:
+
+1. Abro el editor en la carpeta del repo.
+2. Creo `src/content/capitulos/samantha-solstice/03-mi-titulo.md`.
+3. Escribo el frontmatter y el texto.
+4. `git add`, `git commit -m "Capítulo 3"`, `git push`.
+5. Espero 1-2 minutos.
+6. Está en `jackblysander.com`.
+7. Voy a Buttondown y mando el aviso a la lista.
+
+Fin.
+
+---
+
+## Estructura del proyecto
+
+```
+.
+├── .github/workflows/deploy.yml   # CI: build + deploy a GitHub Pages
+├── astro.config.mjs               # Configuración Astro
+├── public/
+│   ├── CNAME                      # Dominio personalizado
+│   ├── logo.png
+│   └── logo-transparent.png
+├── src/
+│   ├── components/                # Header, Footer, NewsletterForm, ObraCard
+│   ├── content/
+│   │   ├── config.ts              # Schemas Zod (frontmatter validado)
+│   │   ├── obras/                 # Una obra = un .md
+│   │   ├── capitulos/<obra>/      # Capítulos por obra
+│   │   └── sobre.md               # Página "Sobre el autor"
+│   ├── layouts/BaseLayout.astro
+│   ├── pages/
+│   │   ├── index.astro            # /
+│   │   ├── obras/index.astro      # /obras/
+│   │   ├── obras/[slug]/index.astro       # /obras/<slug>/
+│   │   ├── obras/[slug]/[capitulo].astro  # /obras/<slug>/<cap>/
+│   │   ├── sobre.astro            # /sobre/
+│   │   ├── rss.xml.ts             # /rss.xml
+│   │   └── 404.astro
+│   └── styles/global.css
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+---
+
+## Newsletter (Buttondown)
+
+El formulario de suscripción está en
+`src/components/NewsletterForm.astro` y apunta al endpoint público
+de Buttondown:
+
+```
+https://buttondown.com/api/emails/embed-subscribe/jack_b_lysander
+```
+
+No hay claves API ni variables de entorno. El formulario funciona
+solo con HTML; Buttondown gestiona double opt-in y envíos del lado
+servidor.
+
+Si algún día cambia el nombre de usuario de Buttondown, edita ese
+archivo (es la única referencia en el código).
+
