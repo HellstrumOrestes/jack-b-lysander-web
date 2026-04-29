@@ -122,27 +122,27 @@ const seriesSchema = {
     {terminosGlosario.length > 0 && (
       <section class="glosario-section">
         <h2>Glosario</h2>
-        <p class="glosario-intro text-soft">
-          Personajes, lugares y objetos de esta obra.
-        </p>
-        <ul class="glosario-mini">
-          {terminosGlosario.slice(0, 5).map((t) => {
+        <ol class="glosario-list">
+          {terminosGlosario.map((t) => {
             const tSlug = t.id.split('/').pop();
             return (
               <li>
-                <a href={`/obras/${obra.id}/glosario/${tSlug}/`}>
-                  {t.data.termino}
+                <a
+                  href={`/obras/${obra.id}/glosario/${tSlug}/`}
+                  aria-label={`Ver entrada del glosario: ${t.data.termino}`}
+                >
+                  <div class="info">
+                    <span class="termino">{t.data.termino}</span>
+                    <span class="termino-desc">{t.data.descripcion_corta}</span>
+                  </div>
+                  <span class="cta" aria-hidden="true">
+                    Ver <span class="arrow">→</span>
+                  </span>
                 </a>
-                <span class="text-soft"> — {t.data.descripcion_corta}</span>
               </li>
             );
           })}
-        </ul>
-        <p class="glosario-link">
-          <a href={`/obras/${obra.id}/glosario/`}>
-            Ver glosario completo <span aria-hidden="true">→</span>
-          </a>
-        </p>
+        </ol>
       </section>
     )}
   </article>
@@ -271,7 +271,7 @@ const seriesSchema = {
     }
   }
 
-  /* Sección glosario en la página de obra */
+  /* Sección glosario en la página de obra (al final, mismo formato que capítulos) */
   .glosario-section {
     max-width: var(--measure);
     margin: var(--space-lg) auto 0;
@@ -282,38 +282,67 @@ const seriesSchema = {
     padding-bottom: 0.4rem;
     margin-bottom: 0.5rem;
   }
-  .glosario-intro {
-    margin: 0 0 0.8rem;
-    font-size: 0.95rem;
-  }
-  .glosario-mini {
+  .glosario-list {
     list-style: none;
     padding: 0;
-    margin: 0 0 1rem;
-  }
-  .glosario-mini li {
-    padding: 0.35rem 0;
-    line-height: 1.5;
-  }
-  .glosario-mini li a {
-    font-weight: 600;
-    color: var(--color-text);
-    text-decoration: none;
-  }
-  .glosario-mini li a:hover {
-    color: var(--color-accent);
-  }
-  .glosario-link {
     margin: 0;
-    font-family: var(--font-sans);
-    font-size: 0.92rem;
   }
-  .glosario-link a {
-    color: var(--color-accent);
+  .glosario-list li {
+    border-bottom: 1px solid var(--color-border);
+  }
+  .glosario-list a {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    align-items: start;
+    padding: 0.85rem 0.5rem;
     text-decoration: none;
+    color: var(--color-text);
+    transition: background-color 120ms ease;
   }
-  .glosario-link a:hover {
-    color: var(--color-accent-hover);
-    text-decoration: underline;
+  .glosario-list a:hover {
+    background-color: var(--color-bg-soft);
+  }
+  .glosario-list a:hover .termino,
+  .glosario-list a:hover .cta {
+    color: var(--color-accent);
+  }
+  .glosario-list a:hover .arrow {
+    transform: translateX(3px);
+  }
+  .glosario-list .info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+  .glosario-list .termino {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: color 120ms ease;
+  }
+  .glosario-list .termino-desc {
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    color: var(--color-text-soft);
+  }
+  .glosario-list .cta {
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-soft);
+    white-space: nowrap;
+    transition: color 120ms ease;
+  }
+  .glosario-list .arrow {
+    display: inline-block;
+    transition: transform 120ms ease;
+  }
+  @media (max-width: 520px) {
+    .glosario-list a {
+      gap: 0.6rem;
+      padding: 0.75rem 0.25rem;
+    }
   }
 </style>
