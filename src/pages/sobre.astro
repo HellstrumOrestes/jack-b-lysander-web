@@ -8,17 +8,30 @@ import NewsletterForm from '../components/NewsletterForm.astro';
 let Content: any = null;
 let frontmatter: any = {};
 try {
-  const mod: any = await import('../content/sobre.md');
+  const mod: any = await import('../sobre.md');
   Content = mod.Content;
   frontmatter = mod.frontmatter ?? {};
 } catch {
   // si no existe el archivo, dejamos los defaults
 }
+
+// JSON-LD Person: identifica al autor para que motores y LLMs
+// asocien correctamente las obras y la página.
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Jack B. Lysander',
+  alternateName: 'Jack B. Lysander',
+  description: frontmatter.descripcion ?? 'Autor de ficción serializada en español.',
+  url: new URL('/sobre/', Astro.site).toString(),
+  inLanguage: 'es-ES',
+};
 ---
 
 <BaseLayout
   title={frontmatter.titulo ?? 'Sobre el autor'}
   description={frontmatter.descripcion ?? 'Sobre Jack B. Lysander.'}
+  schema={[personSchema]}
 >
   <article class="prose sobre">
     <h1>{frontmatter.titulo ?? 'Sobre el autor'}</h1>

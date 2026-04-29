@@ -9,7 +9,7 @@ const { obra } = Astro.props;
 
 <article class="obra-card">
   <h3>
-    <a href={`/obras/${obra.slug}/`}>{obra.data.titulo}</a>
+    <a href={`/obras/${obra.id}/`}>{obra.data.titulo}</a>
   </h3>
   <p class="meta">
     {obra.data.genero ? `${obra.data.genero} · ` : ''}{obra.data.estado}

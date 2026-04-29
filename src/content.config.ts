@@ -3,9 +3,10 @@
 // frontmatter inválido, el build falla indicando archivo y campo.
 
 import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
 const obras = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.md', base: './src/content/obras' }),
   schema: z.object({
     titulo: z.string(),
     sinopsis_corta: z.string(),
@@ -13,13 +14,18 @@ const obras = defineCollection({
     genero: z.string().optional(),
     estado: z.enum(['En publicación', 'Completa', 'En pausa']),
     fecha_inicio: z.date(),
-    imagen_portada: z.string().optional(),
+    // Permitimos rutas absolutas locales (/imagen.jpg) o URLs https.
+    // Esto evita que un valor accidental se cuele como atributo src.
+    imagen_portada: z
+      .string()
+      .regex(/^(\/|https:\/\/)/, 'imagen_portada debe empezar por "/" o "https://"')
+      .optional(),
     orden: z.number().optional(),
   }),
 });
 
 const capitulos = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.md', base: './src/content/capitulos' }),
   schema: z.object({
     titulo: z.string(),
     numero: z.number().int().positive(),

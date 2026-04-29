@@ -437,6 +437,44 @@ Fin.
 
 ---
 
+## SEO y archivos automáticos
+
+El sitio genera en cada build:
+
+- **`/sitemap-index.xml`** y `/sitemap-0.xml` — para Google y otros buscadores. Generados por `@astrojs/sitemap`.
+- **`/robots.txt`** — permite el rastreo a todos los user-agents y declara la ubicación del sitemap.
+- **`/rss.xml`** — feed RSS con todos los capítulos publicados (no borradores), descendente por fecha.
+- **`/llms.txt`** — descripción del sitio en formato Markdown para LLMs (ChatGPT, Claude, Perplexity, etc.). Sigue la convención de [llmstxt.org](https://llmstxt.org). Se regenera con cada build con la lista de obras y capítulos publicados.
+
+Todas las páginas tienen meta tags Open Graph completos, Twitter Cards (`summary_large_image`), canonical correcto, `theme-color`, y JSON-LD Schema.org según el tipo:
+
+- Home, /obras/, /sobre/, /404 → `WebSite` global.
+- /obras/[slug]/ → `CreativeWorkSeries` con autor, idioma, género y `hasPart` con todos los capítulos.
+- /obras/[slug]/[capitulo]/ → `Article` con autor, fecha de publicación e `isPartOf` apuntando a la obra.
+- /sobre/ → `Person`.
+
+### Imagen Open Graph (`og:image`)
+
+Cuando alguien comparte un enlace tuyo en redes sociales o en mensajería, esa imagen es la que aparece como preview. Hoy el sitio usa `public/logo-transparent.png` como placeholder, lo cual no es ideal.
+
+Para sustituirla por la definitiva:
+
+1. Crea un PNG de **1200×630 px** con el branding que quieras (nombre del autor, fondo crema, una línea sutil…).
+2. Guárdalo como `public/og-default.png`.
+3. Edita `src/components/SEO.astro`, busca la línea con `// TODO: sustituir por imagen Open Graph` y cambia `/logo-transparent.png` por `/og-default.png`.
+4. Commit + push.
+
+A nivel de obra, también puedes poner una `imagen_portada` en el frontmatter de cada `obras/<slug>.md`; ese valor se usa como `og:image` en las páginas de obra y de sus capítulos.
+
+### Favicon
+
+Hoy el favicon es un placeholder SVG con las iniciales JBL en burdeos sobre crema (`public/favicon.svg`). Cuando tengas un favicon definitivo:
+
+- Sustituye `public/favicon.svg` por tu versión SVG (ideal por nitidez).
+- Si quieres versiones PNG (16×16, 32×32, apple-touch-icon 180×180), genera los archivos con cualquier favicon generator (p. ej. <https://realfavicongenerator.net>) y métela en `public/`. Ya está enlazado en `BaseLayout.astro` un fallback PNG genérico — puedes ajustar las rutas allí.
+
+---
+
 ## Newsletter (Buttondown)
 
 El formulario de suscripción está en

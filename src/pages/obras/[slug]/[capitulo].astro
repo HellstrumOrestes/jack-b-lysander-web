@@ -1,27 +1,37 @@
 ---
 // Página de un capítulo individual.
 // Ruta: /obras/[slug-obra]/[numero-titulo]/
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import NewsletterForm from '../../../components/NewsletterForm.astro';
 
 export async function getStaticPaths() {
   const obras = await getCollection('obras');
-  const obrasMap = new Map(obras.map((o) => [o.slug, o]));
-  // (slug = nombre del archivo sin .md)
+  const obrasMap = new Map(obras.map((o) => [o.id, o]));
 
   // Solo capítulos publicados (no borradores)
-  const capitulos = (await getCollection('capitulos', (c) => c.data.borrador !== true));
+  const capitulos = await getCollection('capitulos', (c) => c.data.borrador !== true);
 
-  // Agrupar por obra para calcular prev/next
+  // Agrupar por obra para calcular prev/next y detectar duplicados
   const porObra = new Map<string, typeof capitulos>();
   for (const cap of capitulos) {
     const arr = porObra.get(cap.data.obra) ?? [];
     arr.push(cap);
     porObra.set(cap.data.obra, arr);
   }
-  for (const arr of porObra.values()) {
+  for (const [obraSlug, arr] of porObra.entries()) {
     arr.sort((a, b) => a.data.numero - b.data.numero);
+    // Validación: dos capítulos con el mismo número en la misma obra
+    const numeros = new Set<number>();
+    for (const c of arr) {
+      if (numeros.has(c.data.numero)) {
+        throw new Error(
+          `Dos capítulos con número ${c.data.numero} en la obra "${obraSlug}". ` +
+            `Revisa src/content/capitulos/${obraSlug}/.`,
+        );
+      }
+      numeros.add(c.data.numero);
+    }
   }
 
   const paths = [];
@@ -37,11 +47,11 @@ export async function getStaticPaths() {
     const prev = idx > 0 ? lista[idx - 1] : null;
     const next = idx < lista.length - 1 ? lista[idx + 1] : null;
 
-    // El slug del archivo es "samantha-solstice/01-titulo"; cogemos la parte final
-    const capSlug = cap.slug.split('/').pop() as string;
+    // El id del archivo es "samantha-solstice/01-titulo"; cogemos la parte final
+    const capSlug = cap.id.split('/').pop() as string;
 
     paths.push({
-      params: { slug: obra.slug, capitulo: capSlug },
+      params: { slug: obra.id, capitulo: capSlug },
       props: { cap, obra, prev, next },
     });
   }
@@ -49,7 +59,7 @@ export async function getStaticPaths() {
 }
 
 const { cap, obra, prev, next } = Astro.props;
-const { Content } = await cap.render();
+const { Content } = await render(cap);
 
 const fechaFmt = cap.data.fecha.toLocaleDateString('es-ES', {
   day: 'numeric',
@@ -58,19 +68,49 @@ const fechaFmt = cap.data.fecha.toLocaleDateString('es-ES', {
 });
 const padNum = (n: number) => String(n).padStart(2, '0');
 
-const prevSlug = prev ? prev.slug.split('/').pop() : null;
-const nextSlug = next ? next.slug.split('/').pop() : null;
+const prevSlug = prev ? prev.id.split('/').pop() : null;
+const nextSlug = next ? next.id.split('/').pop() : null;
+
+// JSON-LD Article: marca el capítulo como artículo en español, parte de
+// la obra (CreativeWorkSeries) y firmado por el autor.
+const obraUrl = new URL(`/obras/${obra.id}/`, Astro.site).toString();
+const capUrl = Astro.url.toString();
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: cap.data.titulo,
+  url: capUrl,
+  inLanguage: 'es-ES',
+  description:
+    cap.data.sinopsis ?? `Capítulo ${cap.data.numero} de ${obra.data.titulo}.`,
+  datePublished: cap.data.fecha.toISOString(),
+  author: {
+    '@type': 'Person',
+    name: 'Jack B. Lysander',
+    url: new URL('/sobre/', Astro.site).toString(),
+  },
+  isPartOf: {
+    '@type': 'CreativeWorkSeries',
+    name: obra.data.titulo,
+    url: obraUrl,
+  },
+  position: cap.data.numero,
+};
 ---
 
 <BaseLayout
   title={`${cap.data.titulo} · ${obra.data.titulo}`}
   description={cap.data.sinopsis ?? `Capítulo ${cap.data.numero} de ${obra.data.titulo}.`}
+  type="article"
+  publishedTime={cap.data.fecha.toISOString()}
+  ogImage={obra.data.imagen_portada}
+  schema={[articleSchema]}
 >
   <article>
     <nav class="breadcrumb" aria-label="Migas de pan">
       <a href="/obras/">Obras</a>
       <span aria-hidden="true">›</span>
-      <a href={`/obras/${obra.slug}/`}>{obra.data.titulo}</a>
+      <a href={`/obras/${obra.id}/`}>{obra.data.titulo}</a>
     </nav>
 
     <header class="cap-header">
@@ -89,18 +129,18 @@ const nextSlug = next ? next.slug.split('/').pop() : null;
     <nav class="cap-nav" aria-label="Navegación entre capítulos">
       <div class="nav-prev">
         {prev ? (
-          <a href={`/obras/${obra.slug}/${prevSlug}/`}>
+          <a href={`/obras/${obra.id}/${prevSlug}/`}>
             <span class="dir">← Anterior</span>
             <span class="t">{prev.data.titulo}</span>
           </a>
         ) : <span class="disabled">— Primer capítulo —</span>}
       </div>
       <div class="nav-index">
-        <a href={`/obras/${obra.slug}/`}>Índice</a>
+        <a href={`/obras/${obra.id}/`}>Índice</a>
       </div>
       <div class="nav-next">
         {next ? (
-          <a href={`/obras/${obra.slug}/${nextSlug}/`}>
+          <a href={`/obras/${obra.id}/${nextSlug}/`}>
             <span class="dir">Siguiente →</span>
             <span class="t">{next.data.titulo}</span>
           </a>

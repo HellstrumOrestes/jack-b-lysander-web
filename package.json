@@ -11,9 +11,13 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.0.0",
-    "@astrojs/rss": "^4.0.0",
-    "@fontsource/eb-garamond": "^5.0.0",
-    "@fontsource/inter": "^5.0.0"
+    "astro": "6.1.10",
+    "@astrojs/rss": "4.0.18",
+    "@astrojs/sitemap": "3.7.2",
+    "@fontsource/eb-garamond": "5.2.7",
+    "@fontsource/inter": "5.2.8"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }

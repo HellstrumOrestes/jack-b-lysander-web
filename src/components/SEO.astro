@@ -1,0 +1,94 @@
+---
+// Componente SEO central: title, description, canonical, Open Graph,
+// Twitter Cards y JSON-LD. Cada página le pasa sus props específicas.
+//
+// Props:
+//   - title: si rawTitle=false (por defecto), se le añade " — Jack B. Lysander".
+//   - description: meta description y og:description.
+//   - ogImage: ruta absoluta o URL de la imagen Open Graph (1200×630 recomendado).
+//   - type: 'website' (default) o 'article' (capítulos).
+//   - publishedTime / modifiedTime: para article, en ISO 8601 (opcional).
+//   - schema: array de objetos JSON-LD adicionales para esta página
+//     (Person, CreativeWorkSeries, Chapter, etc.). Se serializan tal cual.
+//
+// El schema WebSite global se añade automáticamente en todas las páginas.
+
+interface Props {
+  title: string;
+  description: string;
+  rawTitle?: boolean;
+  ogImage?: string;
+  type?: 'website' | 'article';
+  publishedTime?: string;
+  modifiedTime?: string;
+  schema?: Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  rawTitle = false,
+  // TODO: sustituir por imagen Open Graph definitiva 1200×630 px
+  // (cuando el autor proporcione el archivo, p. ej. /og-default.png).
+  ogImage = '/logo-transparent.png',
+  type = 'website',
+  publishedTime,
+  modifiedTime,
+  schema = [],
+} = Astro.props;
+
+const SITE_NAME = 'Jack B. Lysander';
+const fullTitle = rawTitle ? title : `${title} — ${SITE_NAME}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const ogImageUrl = new URL(ogImage, Astro.site).toString();
+
+// Schema WebSite global (siempre presente).
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE_NAME,
+  url: Astro.site?.toString(),
+  inLanguage: 'es-ES',
+  description: 'Ficción serializada en español por Jack B. Lysander.',
+  author: {
+    '@type': 'Person',
+    name: SITE_NAME,
+  },
+};
+
+const allSchemas = [websiteSchema, ...schema];
+---
+
+<!-- Básicos -->
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+<!-- Open Graph -->
+<meta property="og:type" content={type} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:locale" content="es_ES" />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta property="og:image" content={ogImageUrl} />
+{type === 'article' && publishedTime && (
+  <meta property="article:published_time" content={publishedTime} />
+)}
+{type === 'article' && modifiedTime && (
+  <meta property="article:modified_time" content={modifiedTime} />
+)}
+{type === 'article' && (
+  <meta property="article:author" content={SITE_NAME} />
+)}
+
+<!-- Twitter Cards -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageUrl} />
+
+<!-- JSON-LD -->
+{allSchemas.map((s) => (
+  <script type="application/ld+json" set:html={JSON.stringify(s)} />
+))}
