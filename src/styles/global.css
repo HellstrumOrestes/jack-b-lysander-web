@@ -107,6 +107,13 @@ main {
   padding: var(--space-lg) var(--space-md);
 }
 
+/* Variante ancha: para páginas de listado/grid (índice de glosario, etc.).
+   No usar en páginas de lectura larga, ahí el max-width estrecho es lo
+   que mantiene la línea cómoda. */
+main.wide {
+  max-width: 1100px;
+}
+
 /* Cuerpo de capítulo: ancho cómodo de lectura */
 .prose {
   max-width: var(--measure);

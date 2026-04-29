@@ -20,6 +20,9 @@ interface Props {
   modifiedTime?: string;
   /** Array de objetos JSON-LD adicionales (Person, Chapter, etc.). */
   schema?: Record<string, unknown>[];
+  /** Si true, el contenedor principal usa un ancho mayor (ideal para
+   *  páginas de listado en grid, no para lectura larga). */
+  wide?: boolean;
 }
 
 const {
@@ -31,6 +34,7 @@ const {
   publishedTime,
   modifiedTime,
   schema,
+  wide = false,
 } = Astro.props;
 ---
 
@@ -75,7 +79,7 @@ const {
   <body>
     <div class="site-wrapper">
       <Header />
-      <main>
+      <main class={wide ? 'wide' : undefined}>
         <slot />
       </main>
       <Footer />
