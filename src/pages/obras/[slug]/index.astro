@@ -122,27 +122,18 @@ const seriesSchema = {
     {terminosGlosario.length > 0 && (
       <section class="glosario-section">
         <h2>Glosario</h2>
-        <ol class="glosario-list">
-          {terminosGlosario.map((t) => {
-            const tSlug = t.id.split('/').pop();
-            return (
-              <li>
-                <a
-                  href={`/obras/${obra.id}/glosario/${tSlug}/`}
-                  aria-label={`Ver entrada del glosario: ${t.data.termino}`}
-                >
-                  <div class="info">
-                    <span class="termino">{t.data.termino}</span>
-                    <span class="termino-desc">{t.data.descripcion_corta}</span>
-                  </div>
-                  <span class="cta" aria-hidden="true">
-                    Ver <span class="arrow">→</span>
-                  </span>
-                </a>
-              </li>
-            );
-          })}
-        </ol>
+        <a
+          class="glosario-cta"
+          href={`/obras/${obra.id}/glosario/`}
+          aria-label={`Ver glosario completo de ${obra.data.titulo}`}
+        >
+          <span class="info">
+            {terminosGlosario.length} {terminosGlosario.length === 1 ? 'entrada' : 'entradas'} sobre personajes, lugares y términos clave de esta obra.
+          </span>
+          <span class="cta" aria-hidden="true">
+            Ver glosario <span class="arrow">→</span>
+          </span>
+        </a>
       </section>
     )}
   </article>
@@ -271,7 +262,7 @@ const seriesSchema = {
     }
   }
 
-  /* Sección glosario en la página de obra (al final, mismo formato que capítulos) */
+  /* Sección glosario: bloque sutil que invita a entrar al índice */
   .glosario-section {
     max-width: var(--measure);
     margin: var(--space-lg) auto 0;
@@ -282,52 +273,31 @@ const seriesSchema = {
     padding-bottom: 0.4rem;
     margin-bottom: 0.5rem;
   }
-  .glosario-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .glosario-list li {
-    border-bottom: 1px solid var(--color-border);
-  }
-  .glosario-list a {
+  .glosario-cta {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 1rem;
-    align-items: start;
+    align-items: center;
     padding: 0.85rem 0.5rem;
     text-decoration: none;
     color: var(--color-text);
     transition: background-color 120ms ease;
+    border-bottom: 1px solid var(--color-border);
   }
-  .glosario-list a:hover {
+  .glosario-cta:hover {
     background-color: var(--color-bg-soft);
   }
-  .glosario-list a:hover .termino,
-  .glosario-list a:hover .cta {
+  .glosario-cta:hover .cta {
     color: var(--color-accent);
   }
-  .glosario-list a:hover .arrow {
+  .glosario-cta:hover .arrow {
     transform: translateX(3px);
   }
-  .glosario-list .info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    min-width: 0;
-  }
-  .glosario-list .termino {
+  .glosario-cta .info {
     font-family: var(--font-serif);
-    font-size: 1.1rem;
-    font-weight: 600;
-    transition: color 120ms ease;
-  }
-  .glosario-list .termino-desc {
-    font-family: var(--font-serif);
-    font-size: 0.95rem;
     color: var(--color-text-soft);
   }
-  .glosario-list .cta {
+  .glosario-cta .cta {
     font-family: var(--font-sans);
     font-size: 0.9rem;
     font-weight: 500;
@@ -335,12 +305,12 @@ const seriesSchema = {
     white-space: nowrap;
     transition: color 120ms ease;
   }
-  .glosario-list .arrow {
+  .glosario-cta .arrow {
     display: inline-block;
     transition: transform 120ms ease;
   }
   @media (max-width: 520px) {
-    .glosario-list a {
+    .glosario-cta {
       gap: 0.6rem;
       padding: 0.75rem 0.25rem;
     }
