@@ -66,6 +66,7 @@ const seriesSchema = {
   description={obra.data.sinopsis_corta}
   ogImage={obra.data.imagen_portada}
   schema={[seriesSchema]}
+  wide
 >
   <article class="obra">
     {obra.data.imagen_portada && (
@@ -91,7 +92,7 @@ const seriesSchema = {
       {capitulos.length === 0 ? (
         <p class="text-soft">Aún no hay capítulos publicados.</p>
       ) : (
-        <ol class="capitulos-list">
+        <ol class="capitulos-grid">
           {capitulos.map((cap) => {
             const slugCap = cap.id.split('/').pop();
             return (
@@ -100,14 +101,12 @@ const seriesSchema = {
                   href={`/obras/${obra.id}/${slugCap}/`}
                   aria-label={`Leer capítulo ${cap.data.numero}: ${cap.data.titulo}`}
                 >
-                  <span class="num">{padNum(cap.data.numero)}</span>
-                  <div class="info">
-                    <span class="titulo">{cap.data.titulo}</span>
-                    <span class="fecha">{fechaFmt(cap.data.fecha)}</span>
-                    {cap.data.sinopsis && (
-                      <span class="cap-sinopsis">{cap.data.sinopsis}</span>
-                    )}
-                  </div>
+                  <span class="num">Capítulo {padNum(cap.data.numero)}</span>
+                  <span class="titulo">{cap.data.titulo}</span>
+                  <span class="fecha">{fechaFmt(cap.data.fecha)}</span>
+                  {cap.data.sinopsis && (
+                    <span class="cap-sinopsis">{cap.data.sinopsis}</span>
+                  )}
                   <span class="cta" aria-hidden="true">
                     Leer <span class="arrow">→</span>
                   </span>
@@ -165,101 +164,107 @@ const seriesSchema = {
     margin: 0;
   }
   .sinopsis {
-    margin-bottom: var(--space-lg);
+    max-width: var(--measure);
+    margin: 0 auto var(--space-lg);
   }
   .capitulos {
-    max-width: var(--measure);
-    margin: 0 auto;
+    /* Sin max-width: usa el ancho amplio (wide) para que la grid respire */
   }
   .capitulos h2 {
     font-size: 1.4rem;
     border-bottom: 1px solid var(--color-border);
     padding-bottom: 0.4rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
   }
-  .capitulos-list {
+  /* Grid de capítulos: 3 cols desktop, 2 tablet, 1 móvil */
+  .capitulos-grid {
     list-style: none;
     padding: 0;
     margin: 0;
-  }
-  .capitulos-list li {
-    border-bottom: 1px solid var(--color-border);
-  }
-  .capitulos-list a {
     display: grid;
-    grid-template-columns: 2.4em 1fr auto;
-    gap: 1rem;
-    align-items: start;
-    padding: 0.85rem 0.5rem;
-    text-decoration: none;
-    color: var(--color-text);
-    transition: background-color 120ms ease;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.85rem;
   }
-  .capitulos-list a:hover {
-    background-color: var(--color-bg-soft);
+  @media (max-width: 800px) {
+    .capitulos-grid { grid-template-columns: repeat(2, 1fr); }
   }
-  .capitulos-list a:hover .titulo,
-  .capitulos-list a:hover .cta {
-    color: var(--color-accent);
+  @media (max-width: 520px) {
+    .capitulos-grid { grid-template-columns: 1fr; }
   }
-  .capitulos-list a:hover .arrow {
-    transform: translateX(3px);
+  .capitulos-grid li {
+    list-style: none;
   }
-  .capitulos-list .num {
-    font-family: var(--font-sans);
-    font-feature-settings: 'tnum';
-    color: var(--color-text-soft);
-    font-size: 0.9rem;
-    padding-top: 0.2rem;
-  }
-  .capitulos-list .info {
+  .capitulos-grid a {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
-    min-width: 0;
+    height: 100%;
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-bg);
+    text-decoration: none;
+    color: var(--color-text);
+    transition: background-color 120ms ease, border-color 120ms ease;
   }
-  .capitulos-list .titulo {
+  .capitulos-grid a:hover {
+    background-color: var(--color-bg-soft);
+    border-color: var(--color-accent);
+  }
+  .capitulos-grid a:hover .titulo,
+  .capitulos-grid a:hover .cta {
+    color: var(--color-accent);
+  }
+  .capitulos-grid a:hover .arrow {
+    transform: translateX(3px);
+  }
+  .capitulos-grid .num {
+    font-family: var(--font-sans);
+    font-feature-settings: 'tnum';
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.75rem;
+    color: var(--color-text-soft);
+    margin-bottom: 0.2rem;
+  }
+  .capitulos-grid .titulo {
     font-family: var(--font-serif);
-    font-size: 1.15rem;
+    font-size: 1.2rem;
+    font-weight: 600;
     line-height: 1.3;
+    margin-bottom: 0.25rem;
     transition: color 120ms ease;
   }
-  .capitulos-list .fecha {
+  .capitulos-grid .fecha {
     font-family: var(--font-sans);
     font-size: 0.78rem;
     color: var(--color-text-soft);
     letter-spacing: 0.02em;
+    margin-bottom: 0.55rem;
   }
-  .capitulos-list .cap-sinopsis {
+  .capitulos-grid .cap-sinopsis {
     font-family: var(--font-serif);
     font-size: 0.95rem;
     color: var(--color-text-soft);
-    margin-top: 0.15rem;
+    line-height: 1.45;
+    flex: 1;
+    margin-bottom: 0.7rem;
+    /* Hasta 4 líneas, luego elipsis */
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
-  .capitulos-list .cta {
+  .capitulos-grid .cta {
+    margin-top: auto;
     font-family: var(--font-sans);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 500;
     color: var(--color-text-soft);
-    white-space: nowrap;
-    letter-spacing: 0.01em;
     transition: color 120ms ease;
   }
-  .capitulos-list .arrow {
+  .capitulos-grid .arrow {
     display: inline-block;
     transition: transform 120ms ease;
-  }
-  @media (max-width: 520px) {
-    .capitulos-list a {
-      grid-template-columns: 2em 1fr;
-      gap: 0.6rem;
-      padding: 0.75rem 0.25rem;
-    }
-    .capitulos-list .cta {
-      grid-column: 2;
-      justify-self: end;
-      margin-top: 0.4rem;
-    }
   }
 
   /* Sección glosario: bloque sutil que invita a entrar al índice */
