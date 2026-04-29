@@ -74,16 +74,14 @@ const {
       schema={schema}
     />
 
-    <!-- No-flash: aplicar tema antes de pintar para evitar destello -->
+    <!-- No-flash: aplicar tema antes de pintar.
+         Default explícito: modo claro. Solo se respeta la elección del
+         usuario guardada en localStorage; ignoramos prefers-color-scheme
+         del sistema para que la primera visita siempre sea clara. -->
     <script is:inline>
       (function () {
         try {
-          var t = localStorage.getItem('jbl-theme');
-          if (!t) {
-            t = window.matchMedia('(prefers-color-scheme: dark)').matches
-              ? 'dark'
-              : 'light';
-          }
+          var t = localStorage.getItem('jbl-theme') || 'light';
           document.documentElement.setAttribute('data-theme', t);
         } catch (e) {}
       })();
