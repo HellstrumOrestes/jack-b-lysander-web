@@ -1,14 +1,16 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Fleuron from '../components/Fleuron.astro';
 ---
 
 <BaseLayout title="Página no encontrada" description="404 - Esta página no existe.">
   <div class="not-found">
     <p class="meta">Error 404</p>
     <h1>Esta página no existe</h1>
+    <div class="orn"><Fleuron size={14} opacity={0.5} /></div>
     <p>
       Quizás te has perdido entre capítulos. Vuelve a las
-      <a href="/obras/">obras</a> o a la <a href="/">portada</a>.
+      <a href="/">obras</a> o a la <a href="/sobre/">página del autor</a>.
     </p>
   </div>
 </BaseLayout>
@@ -17,17 +19,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .not-found {
     text-align: center;
     padding: var(--space-xl) 0;
+    max-width: var(--measure);
+    margin: 0 auto;
   }
   .not-found h1 {
-    font-size: 2rem;
-    margin: 0.5rem 0 1rem;
+    font-family: var(--display);
+    font-size: 2.2rem;
+    font-weight: 500;
+    margin: 0.5rem 0 0.6rem;
   }
   .not-found .meta {
-    font-family: var(--font-sans);
+    font-family: var(--sans);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.8rem;
-    color: var(--color-text-soft);
+    letter-spacing: 0.16em;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
     margin: 0;
+  }
+  .not-found .orn {
+    color: var(--ink-faint);
+    margin: 0.6rem 0 1rem;
   }
 </style>

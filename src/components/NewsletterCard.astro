@@ -1,49 +1,155 @@
 ---
-// Tarjeta-formulario para suscripción a newsletter.
+// Tarjeta-formulario para suscripción a la newsletter de Buttondown.
+// Sin JavaScript propio, sin claves API. Buttondown gestiona el
+// double opt-in del lado servidor.
+//
+// Username de Buttondown: jack_b_lysander
+// Endpoint público:
+//   https://buttondown.com/api/emails/embed-subscribe/jack_b_lysander
+//
+// Props:
+//   - compact: variante reducida para final de capítulo / sidebars.
+//   - title: titular personalizable.
+//   - description: subtexto personalizable.
+
 interface Props {
   compact?: boolean;
-  /** Endpoint del formulario (Buttondown, ConvertKit, Mailchimp...). Si está vacío, simula envío. */
-  action?: string;
+  title?: string;
+  description?: string;
 }
-const { compact = false, action = '' } = Astro.props;
+
+const {
+  compact = false,
+  title = compact
+    ? 'Recibe el próximo capítulo'
+    : 'El próximo capítulo, en tu correo',
+  description = 'Aviso por email cuando publico un capítulo nuevo. Sin spam, sin promociones, sin tracking. Solo capítulos.',
+} = Astro.props;
+
+const ENDPOINT =
+  'https://buttondown.com/api/emails/embed-subscribe/jack_b_lysander';
+const POPUP = 'https://buttondown.com/jack_b_lysander';
 ---
-<div class={`newsletter-card ${compact ? 'is-compact' : ''}`}>
+
+<form
+  action={ENDPOINT}
+  method="post"
+  target="popupwindow"
+  onsubmit={`window.open('${POPUP}', 'popupwindow')`}
+  class={`newsletter-card ${compact ? 'is-compact' : ''}`}
+>
   <div class="newsletter-card-body">
     <p class="newsletter-card-kicker">— Newsletter —</p>
-    <h3 class="newsletter-card-title">
-      {compact ? 'Recibe el próximo capítulo' : 'El próximo capítulo, en tu correo'}
-    </h3>
-    {!compact && (
-      <p class="newsletter-card-desc">
-        Aviso por email cuando publico un capítulo nuevo. Sin spam, sin
-        promociones, sin tracking. Solo capítulos.
-      </p>
-    )}
+    <label class="newsletter-card-title" for="bd-email">{title}</label>
+    {!compact && <p class="newsletter-card-desc">{description}</p>}
   </div>
-  <form class="newsletter-card-form" data-newsletter-form
-        method="post" action={action || '#'}>
-    <input type="email" name="email" placeholder="tu@email.com" required
-           aria-label="Tu correo electrónico" />
+  <div class="newsletter-card-form">
+    <input
+      type="email"
+      name="email"
+      id="bd-email"
+      placeholder="tu@email.com"
+      required
+      autocomplete="email"
+      aria-label="Tu correo electrónico"
+    />
     <button type="submit">Suscribirme</button>
-    <p class="newsletter-sent" data-newsletter-sent hidden>
-      Te he añadido a la lista. Revisa tu correo para confirmar.
-    </p>
-  </form>
-</div>
+  </div>
+</form>
 
-<script define:vars={{ action }}>
-  document.querySelectorAll('[data-newsletter-form]').forEach((form) => {
-    form.addEventListener('submit', (e) => {
-      // Si no hay action real, solo simula el envío para el demo.
-      if (!action) {
-        e.preventDefault();
-        const sent = form.querySelector('[data-newsletter-sent]');
-        const inp  = form.querySelector('input[type=email]');
-        const btn  = form.querySelector('button[type=submit]');
-        if (sent) sent.removeAttribute('hidden');
-        if (inp)  inp.setAttribute('hidden', '');
-        if (btn)  btn.setAttribute('hidden', '');
-      }
-    });
-  });
-</script>
+<style>
+  .newsletter-card {
+    background: var(--bg-soft);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 1.6rem 1.6rem 1.4rem;
+    margin: var(--space-lg) auto;
+    max-width: var(--measure);
+    font-family: var(--sans);
+  }
+  .newsletter-card.is-compact {
+    padding: 1.2rem 1.3rem 1.1rem;
+  }
+  .newsletter-card-body {
+    margin-bottom: 1rem;
+  }
+  .newsletter-card-kicker {
+    font-family: var(--sans);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
+  }
+  .newsletter-card-title {
+    display: block;
+    font-family: var(--display);
+    font-size: 1.35rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0 0 0.3rem;
+    line-height: 1.25;
+  }
+  .newsletter-card.is-compact .newsletter-card-title {
+    font-size: 1.15rem;
+  }
+  .newsletter-card-desc {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .newsletter-card-form {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .newsletter-card input[type='email'] {
+    flex: 1 1 220px;
+    min-width: 0;
+    font-family: var(--sans);
+    font-size: 1rem;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--rule);
+    background: var(--bg);
+    color: var(--ink);
+    border-radius: 4px;
+  }
+  .newsletter-card input[type='email']:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+  }
+  .newsletter-card input[type='email']::placeholder {
+    color: var(--ink-faint);
+  }
+  .newsletter-card button {
+    font-family: var(--sans);
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.65rem 1.2rem;
+    background: var(--accent);
+    color: var(--paper);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 120ms ease, border-color 120ms ease;
+  }
+  .newsletter-card button:hover {
+    background: var(--accent-2);
+    border-color: var(--accent-2);
+  }
+  @media (max-width: 480px) {
+    .newsletter-card-form {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .newsletter-card input[type='email'] {
+      flex: 0 0 auto;
+      width: 100%;
+    }
+    .newsletter-card button {
+      width: 100%;
+    }
+  }
+</style>

@@ -1,62 +1,101 @@
 ---
-// Layout base. Coloca aquí <head>, fuentes, theme bootstrap (no-flash),
-// header y footer comunes. Las páginas de obra/capítulo extienden esta.
+// Layout base. Coloca <head>, fuentes self-hosted, theme bootstrap
+// (sin destello), header y footer comunes.
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import SEO from '../components/SEO.astro';
 
 interface Props {
-  title?: string;
+  title: string;
   description?: string;
+  rawTitle?: boolean;
+  ogImage?: string;
+  type?: 'website' | 'article';
+  publishedTime?: string;
+  modifiedTime?: string;
+  schema?: Record<string, unknown>[];
+  /** Variante ancha para páginas de listado/grid. */
+  wide?: boolean;
+  /** Cuál ítem del menú resaltar como activo. */
+  active?: 'obras' | 'sobre' | 'newsletter';
+  /** Clase adicional en <body>. */
   bodyClass?: string;
-  active?: 'home' | 'sobre' | 'newsletter';
 }
 
 const {
-  title = 'Jack B. Lysander — Ficción serializada en español',
-  description = 'Ficción serializada en español. Capítulos publicados sin prisa, sin spam, sin promociones.',
+  title,
+  description = 'Ficción serializada en español por Jack B. Lysander.',
+  rawTitle = false,
+  ogImage,
+  type = 'website',
+  publishedTime,
+  modifiedTime,
+  schema,
+  wide = false,
+  active,
   bodyClass = '',
-  active = 'home',
 } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="es" data-theme="light" data-palette="granate" data-typeset="default">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{title}</title>
-  <meta name="description" content={description} />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <meta name="generator" content={Astro.generator} />
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#f7f1e6" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14110d" media="(prefers-color-scheme: dark)" />
 
-  <!-- Fuentes -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&display=swap" rel="stylesheet" />
+    <!-- Favicons. SVG con prioridad para navegadores modernos.
+         logo-transparent.png como fallback / apple-touch-icon. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" type="image/png" href="/logo-transparent.png" />
+    <link rel="apple-touch-icon" href="/logo-transparent.png" />
 
-  <!-- No-flash: aplica tema antes de pintar -->
-  <script is:inline>
-    (function () {
-      try {
-        var t = localStorage.getItem('jbl-theme');
-        if (!t) {
-          t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-        document.documentElement.setAttribute('data-theme', t);
-      } catch (e) {}
-    })();
-  </script>
-</head>
-<body class={bodyClass}>
-  <div class="site-wrapper">
-    <Header active={active} />
-    <slot />
-    <Footer />
-  </div>
-</body>
+    <!-- RSS y sitemap (autodescubrimiento) -->
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Jack B. Lysander"
+      href="/rss.xml"
+    />
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+
+    <!-- SEO meta + JSON-LD -->
+    <SEO
+      title={title}
+      description={description}
+      rawTitle={rawTitle}
+      ogImage={ogImage}
+      type={type}
+      publishedTime={publishedTime}
+      modifiedTime={modifiedTime}
+      schema={schema}
+    />
+
+    <!-- No-flash: aplicar tema antes de pintar para evitar destello -->
+    <script is:inline>
+      (function () {
+        try {
+          var t = localStorage.getItem('jbl-theme');
+          if (!t) {
+            t = window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body class={bodyClass}>
+    <div class="site-wrapper">
+      <Header active={active} />
+      <main class={wide ? 'wide' : undefined}>
+        <slot />
+      </main>
+      <Footer />
+    </div>
+  </body>
 </html>

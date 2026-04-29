@@ -1,97 +1,275 @@
 ---
+// Página de capítulo individual: header decorado, prosa, navegación
+// prev/next, barra de progreso de lectura y panel de glosario en mobile.
+import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Fleuron from '../../../components/Fleuron.astro';
 import ReadingProgress from '../../../components/ReadingProgress.astro';
 import GlosarioPin from '../../../components/GlosarioPin.astro';
-import ProseParagraph from '../../../components/ProseParagraph.astro';
 import NewsletterCard from '../../../components/NewsletterCard.astro';
-import { getCollection, getEntry } from 'astro:content';
-import { toRoman } from '../../../lib/utils';
 
 export async function getStaticPaths() {
-  const caps = await getCollection('capitulos');
-  return caps.map((c) => {
-    const slugFile = c.slug.split('/').pop();
-    return {
-      params: { slug: c.data.obra, capitulo: slugFile },
-      props: { capitulo: c },
-    };
-  });
+  const obras = await getCollection('obras');
+  const obrasMap = new Map(obras.map((o) => [o.id, o]));
+
+  // Solo capítulos publicados (no borrador, no próximo)
+  const capitulos = await getCollection(
+    'capitulos',
+    (c) => c.data.borrador !== true && c.data.proximo !== true,
+  );
+
+  // Agrupar por obra para calcular prev/next y detectar duplicados
+  const porObra = new Map<string, typeof capitulos>();
+  for (const cap of capitulos) {
+    const arr = porObra.get(cap.data.obra) ?? [];
+    arr.push(cap);
+    porObra.set(cap.data.obra, arr);
+  }
+  for (const [obraSlug, arr] of porObra.entries()) {
+    arr.sort((a, b) => a.data.numero - b.data.numero);
+    const numeros = new Set<number>();
+    for (const c of arr) {
+      if (numeros.has(c.data.numero)) {
+        throw new Error(
+          `Dos capítulos con número ${c.data.numero} en la obra "${obraSlug}". ` +
+            `Revisa src/content/capitulos/${obraSlug}/.`,
+        );
+      }
+      numeros.add(c.data.numero);
+    }
+  }
+
+  const paths = [];
+  for (const cap of capitulos) {
+    const obra = obrasMap.get(cap.data.obra);
+    if (!obra) {
+      throw new Error(
+        `Capítulo "${cap.id}" referencia obra "${cap.data.obra}" que no existe en src/content/obras/.`,
+      );
+    }
+    const lista = porObra.get(cap.data.obra) ?? [];
+    const idx = lista.findIndex((c) => c.id === cap.id);
+    const prev = idx > 0 ? lista[idx - 1] : null;
+    const next = idx < lista.length - 1 ? lista[idx + 1] : null;
+    const capSlug = cap.id.split('/').pop() as string;
+
+    paths.push({
+      params: { slug: obra.id, capitulo: capSlug },
+      props: { cap, obra, prev, next },
+    });
+  }
+  return paths;
 }
 
-const { capitulo } = Astro.props;
-const obra = await getEntry('obras', capitulo.data.obra);
-const siblings = (await getCollection('capitulos', (c) => c.data.obra === capitulo.data.obra))
-  .sort((a, b) => a.data.numero - b.data.numero);
-const idx = siblings.findIndex((c) => c.id === capitulo.id);
-const prev = idx > 0 ? siblings[idx - 1] : null;
-const next = idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : null;
+const { cap, obra, prev, next } = Astro.props;
+const { Content } = await render(cap);
 
-const slugOf = (c: typeof capitulo) => c.slug.split('/').pop();
-const hrefOf = (c: typeof capitulo) => `/obras/${c.data.obra}/${slugOf(c)}/`;
+const fechaFmt = cap.data.fecha.toLocaleDateString('es-ES', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+const padNum = (n: number) => String(n).padStart(2, '0');
 
-// Convertir el cuerpo markdown a párrafos planos para usar ProseParagraph,
-// que soporta los marcadores {término:slug}.
-const raw = capitulo.body.trim();
-const parrafos = raw
-  .split(/\n{2,}/)
-  .map((p) => p.replace(/\n/g, ' ').trim())
-  .filter(Boolean);
+const prevSlug = prev ? prev.id.split('/').pop() : null;
+const nextSlug = next ? next.id.split('/').pop() : null;
+
+// JSON-LD Article
+const obraUrl = new URL(`/obras/${obra.id}/`, Astro.site).toString();
+const capUrl = Astro.url.toString();
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: cap.data.titulo,
+  url: capUrl,
+  inLanguage: 'es-ES',
+  description:
+    cap.data.sinopsis ?? `Capítulo ${cap.data.numero} de ${obra.data.titulo}.`,
+  datePublished: cap.data.fecha.toISOString(),
+  author: {
+    '@type': 'Person',
+    name: 'Jack B. Lysander',
+    url: new URL('/sobre/', Astro.site).toString(),
+  },
+  isPartOf: {
+    '@type': 'CreativeWorkSeries',
+    name: obra.data.titulo,
+    url: obraUrl,
+  },
+  position: cap.data.numero,
+};
 ---
-<BaseLayout active="home"
-            title={`${capitulo.data.titulo} — ${obra?.data.titulo} — Jack B. Lysander`}
-            description={capitulo.data.sinopsis}>
+
+<BaseLayout
+  title={`${cap.data.titulo} · ${obra.data.titulo}`}
+  description={cap.data.sinopsis ?? `Capítulo ${cap.data.numero} de ${obra.data.titulo}.`}
+  type="article"
+  publishedTime={cap.data.fecha.toISOString()}
+  ogImage={obra.data.imagen_portada}
+  schema={[articleSchema]}
+  active="obras"
+>
   <ReadingProgress target=".capitulo" />
-  <main class="view view-capitulo">
-    <nav class="breadcrumb">
-      <a href="/">Obras</a>
-      <span class="sep">/</span>
-      <a href={`/obras/${capitulo.data.obra}/`}>{obra?.data.titulo}</a>
-    </nav>
 
-    <article class="capitulo">
-      <header class="capitulo-header">
-        <p class="capitulo-header-kicker">
-          {obra?.data.titulo} <span class="dot">·</span> Capítulo {toRoman(capitulo.data.numero)}
-        </p>
-        <h1 class="capitulo-header-title">{capitulo.data.titulo}</h1>
-        <p class="capitulo-header-meta">
-          <span>{capitulo.data.fecha}</span>
-          <span class="dot">·</span>
-          <span>{capitulo.data.minutos} min de lectura</span>
-        </p>
-        <div class="capitulo-header-orn"><Fleuron size={14} opacity={0.5} /></div>
-      </header>
+  <nav class="breadcrumb" aria-label="Migas de pan">
+    <a href="/">Obras</a>
+    <span class="sep" aria-hidden="true">/</span>
+    <a href={`/obras/${obra.id}/`}>{obra.data.titulo}</a>
+  </nav>
 
-      <div class="prose">
-        {parrafos.map((p) => <ProseParagraph text={p} />)}
-        <div class="prose-end"><Fleuron size={14} opacity={0.45} /></div>
+  <article class="capitulo">
+    <header class="capitulo-header">
+      <p class="capitulo-header-kicker">
+        {obra.data.titulo} <span class="dot">·</span> Capítulo {padNum(cap.data.numero)}
+      </p>
+      <h1 class="capitulo-header-title">{cap.data.titulo}</h1>
+      <p class="capitulo-header-meta">
+        <span>{fechaFmt}</span>
+        <span class="dot">·</span>
+        <span>{cap.data.minutos} min de lectura</span>
+      </p>
+      <div class="capitulo-header-orn">
+        <Fleuron size={14} opacity={0.5} />
       </div>
-    </article>
+    </header>
 
-    <nav class="capitulo-nav" aria-label="Navegación entre capítulos">
-      <div class="capitulo-nav-grid">
-        {prev ? (
-          <a class="capitulo-nav-prev" href={hrefOf(prev)}>
-            <span class="capitulo-nav-label">← Capítulo {toRoman(prev.data.numero)}</span>
-            <span class="capitulo-nav-title">{prev.data.titulo}</span>
-          </a>
-        ) : <span />}
-        <a class="capitulo-nav-index" href={`/obras/${capitulo.data.obra}/`}>Índice</a>
-        {next ? (
-          <a class={`capitulo-nav-next ${next.data.proximo ? 'is-disabled' : ''}`}
-             href={next.data.proximo ? '#' : hrefOf(next)}
-             aria-disabled={next.data.proximo ? 'true' : 'false'}>
-            <span class="capitulo-nav-label">
-              {next.data.proximo ? 'Próximamente' : `Capítulo ${toRoman(next.data.numero)} →`}
-            </span>
-            <span class="capitulo-nav-title">{next.data.titulo}</span>
-          </a>
-        ) : <span />}
-      </div>
-    </nav>
+    <div class="prose">
+      <Content />
+      <div class="prose-end"><Fleuron size={14} opacity={0.45} /></div>
+    </div>
+  </article>
 
-    <NewsletterCard compact />
-  </main>
+  <nav class="capitulo-nav" aria-label="Navegación entre capítulos">
+    <div class="capitulo-nav-grid">
+      {prev ? (
+        <a class="capitulo-nav-prev" href={`/obras/${obra.id}/${prevSlug}/`}>
+          <span class="capitulo-nav-label">← Capítulo {padNum(prev.data.numero)}</span>
+          <span class="capitulo-nav-title">{prev.data.titulo}</span>
+        </a>
+      ) : <span class="capitulo-nav-prev empty" aria-hidden="true"></span>}
+
+      <a class="capitulo-nav-index" href={`/obras/${obra.id}/`}>Índice</a>
+
+      {next ? (
+        <a class="capitulo-nav-next" href={`/obras/${obra.id}/${nextSlug}/`}>
+          <span class="capitulo-nav-label">Capítulo {padNum(next.data.numero)} →</span>
+          <span class="capitulo-nav-title">{next.data.titulo}</span>
+        </a>
+      ) : <span class="capitulo-nav-next empty" aria-hidden="true"></span>}
+    </div>
+  </nav>
+
+  <NewsletterCard compact />
   <GlosarioPin />
 </BaseLayout>
+
+<style>
+  .breadcrumb {
+    margin-bottom: 1.25rem;
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    text-align: center;
+  }
+  .breadcrumb a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb .sep {
+    margin: 0 0.5rem;
+    color: var(--ink-faint);
+  }
+
+  .capitulo-header {
+    text-align: center;
+    margin: 2rem auto 2.5rem;
+    max-width: var(--measure);
+  }
+  .capitulo-header-kicker {
+    font-family: var(--sans);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+    margin: 0 0 0.6rem;
+  }
+  .capitulo-header-title {
+    font-family: var(--display);
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    font-weight: 500;
+    line-height: 1.1;
+    margin: 0 0 0.6rem;
+    letter-spacing: -0.015em;
+  }
+  .capitulo-header-meta {
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+    margin: 0 0 1rem;
+  }
+  .capitulo-header-orn {
+    color: var(--ink-faint);
+  }
+
+  .prose-end {
+    color: var(--ink-faint);
+    text-align: center;
+    margin: 2.5rem 0 0;
+  }
+
+  /* ─── Navegación entre capítulos ─────────────────────────────────── */
+  .capitulo-nav {
+    margin: var(--space-lg) auto 0;
+    max-width: var(--measure);
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+  }
+  .capitulo-nav-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+    align-items: center;
+    font-family: var(--sans);
+  }
+  .capitulo-nav a {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    color: var(--ink);
+  }
+  .capitulo-nav a:hover .capitulo-nav-title {
+    color: var(--accent);
+  }
+  .capitulo-nav-prev { text-align: left; }
+  .capitulo-nav-next { text-align: right; }
+  .capitulo-nav-label {
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    margin-bottom: 0.15rem;
+  }
+  .capitulo-nav-title {
+    font-family: var(--display);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 120ms ease;
+  }
+  .capitulo-nav-index {
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    text-decoration: underline;
+  }
+  .capitulo-nav-index:hover {
+    color: var(--accent);
+  }
+  .capitulo-nav .empty { display: block; }
+
+  @media (max-width: 600px) {
+    .capitulo-nav-grid {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 0.9rem;
+    }
+    .capitulo-nav-prev,
+    .capitulo-nav-next { text-align: center; }
+  }
+</style>

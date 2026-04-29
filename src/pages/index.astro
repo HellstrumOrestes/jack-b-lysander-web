@@ -1,50 +1,149 @@
 ---
+// Home: hero con nombre y subtítulo, estantería de obras, newsletter.
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Bookshelf from '../components/Bookshelf.astro';
 import NewsletterCard from '../components/NewsletterCard.astro';
 import Fleuron from '../components/Fleuron.astro';
-import { getCollection } from 'astro:content';
 
-const obras = (await getCollection('obras'))
-  .sort((a, b) => (a.data.orden ?? 0) - (b.data.orden ?? 0));
+const obras = (await getCollection('obras')).sort((a, b) => {
+  const oa = a.data.orden ?? 999;
+  const ob = b.data.orden ?? 999;
+  if (oa !== ob) return oa - ob;
+  const fa = a.data.fecha_inicio?.getTime() ?? 0;
+  const fb = b.data.fecha_inicio?.getTime() ?? 0;
+  return fb - fa;
+});
 ---
-<BaseLayout active="home">
-  <main class="view view-home">
-    <section class="hero">
-      <p class="hero-kicker">
-        <span class="rule" /> Ficción serializada en español <span class="rule" />
-      </p>
-      <h1 class="hero-name">
-        <span class="hero-first">Jack B.</span>
-        <span class="hero-last">Lysander</span>
-      </h1>
-      <p class="hero-bio">
-        Aquí publico ficción capítulo a capítulo, sin prisa y sin ruido.
-        Si te gusta lo que lees, suscríbete a la newsletter para recibir
-        cada nuevo capítulo en tu correo.
-      </p>
-      <div class="hero-cta">
-        <a class="btn-primary" href="/newsletter">Suscribirme</a>
-      </div>
-    </section>
 
-    <div class="ornament"><Fleuron size={18} opacity={0.5} /></div>
+<BaseLayout
+  title="Jack B. Lysander"
+  rawTitle
+  description="Ficción serializada en español. Capítulos publicados sin prisa, sin spam."
+  active="obras"
+  wide
+>
+  <section class="hero">
+    <p class="hero-kicker">
+      <span class="rule"></span>
+      <span>Ficción serializada en español</span>
+      <span class="rule"></span>
+    </p>
+    <h1 class="hero-name">
+      <span class="hero-first">Jack B.</span>
+      <span class="hero-last">Lysander</span>
+    </h1>
+    <p class="hero-bio">
+      Aquí publico ficción capítulo a capítulo, sin prisa y sin ruido.
+      Si te gusta lo que lees, suscríbete a la newsletter para recibir
+      cada nuevo capítulo en tu correo.
+    </p>
+  </section>
 
-    <section class="obras-section">
-      <header class="section-head">
-        <p class="section-kicker">Obras</p>
-        <h2 class="section-title">La estantería</h2>
-        <p class="section-desc">
-          Pasa el ratón por un lomo para ver de qué va. Click para entrar.
-        </p>
-      </header>
+  <div class="ornament"><Fleuron size={18} opacity={0.5} /></div>
+
+  <section class="obras-section">
+    <header class="section-head">
+      <p class="section-kicker">Obras</p>
+      <h2 class="section-title">La estantería</h2>
+    </header>
+
+    {obras.length === 0 ? (
+      <p class="text-soft" style="text-align:center;">
+        Aún no hay obras publicadas.
+      </p>
+    ) : (
       <Bookshelf obras={obras} />
-    </section>
+    )}
+  </section>
 
-    <div class="ornament"><Fleuron size={14} opacity={0.4} /></div>
+  <div class="ornament"><Fleuron size={14} opacity={0.4} /></div>
 
-    <section class="newsletter-block">
-      <NewsletterCard />
-    </section>
-  </main>
+  <NewsletterCard />
 </BaseLayout>
+
+<style>
+  /* Hero */
+  .hero {
+    text-align: center;
+    max-width: 720px;
+    margin: 1.5rem auto 3rem;
+    padding: 1rem 0;
+  }
+  .hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 1.75rem;
+  }
+  .hero-kicker .rule {
+    width: 28px;
+    height: 1px;
+    background: var(--ink-faint);
+  }
+  .hero-name {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(3rem, 8vw, 5.4rem);
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    margin: 0 0 1.5rem;
+  }
+  .hero-name .hero-first {
+    display: block;
+    font-style: italic;
+    font-weight: 400;
+  }
+  .hero-name .hero-last {
+    display: block;
+    font-weight: 600;
+  }
+  .hero-bio {
+    max-width: 52ch;
+    margin: 0 auto;
+    font-size: 1.1rem;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+
+  /* Ornamento separador */
+  .ornament {
+    color: var(--ink-faint);
+    margin: 2.5rem auto;
+    text-align: center;
+  }
+
+  /* Sección con título */
+  .obras-section {
+    margin: 0 auto;
+    max-width: 800px;
+  }
+  .section-head {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .section-kicker {
+    font-family: var(--sans);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
+  }
+  .section-title {
+    font-family: var(--display);
+    font-size: 2rem;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  @media (max-width: 600px) {
+    .section-title { font-size: 1.7rem; }
+    .hero-name { font-size: clamp(2.6rem, 12vw, 4rem); }
+  }
+</style>

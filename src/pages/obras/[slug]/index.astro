@@ -1,83 +1,161 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import Fleuron from '../../components/Fleuron.astro';
-import { getCollection } from 'astro:content';
-import { toRoman, estadoSlug } from '../../lib/utils';
+// Página de una obra: cabecera + sinopsis + grid de capítulos + CTA glosario.
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Fleuron from '../../../components/Fleuron.astro';
+import NewsletterCard from '../../../components/NewsletterCard.astro';
 
 export async function getStaticPaths() {
   const obras = await getCollection('obras');
-  return obras.map((o) => ({ params: { slug: o.slug }, props: { obra: o } }));
+  return obras.map((obra) => ({
+    params: { slug: obra.id },
+    props: { obra },
+  }));
 }
 
 const { obra } = Astro.props;
-const allCaps = await getCollection('capitulos', (c) => c.data.obra === obra.slug);
-const capitulos = allCaps.sort((a, b) => a.data.numero - b.data.numero);
+const { Content } = await render(obra);
+
+// Capítulos publicados de esta obra (incluye los marcados como "próximo"
+// para que aparezcan en el listado, pero no los que tengan borrador:true).
+const todos = (await getCollection('capitulos', (c) =>
+  c.data.obra === obra.id && c.data.borrador !== true,
+)).sort((a, b) => a.data.numero - b.data.numero);
+
+// Términos del glosario de esta obra
+const terminos = await getCollection('glosario', (t) => t.data.obra === obra.id);
+
+const fechaFmt = (d: Date) =>
+  d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const padNum = (n: number) => String(n).padStart(2, '0');
+
+// Sinopsis larga: puede ser string o array de párrafos. Si no hay,
+// fallback a sinopsis_corta.
+const sinopParrafos: string[] = Array.isArray(obra.data.sinopsis_larga)
+  ? obra.data.sinopsis_larga
+  : obra.data.sinopsis_larga
+    ? [obra.data.sinopsis_larga]
+    : [obra.data.sinopsis_corta];
+
+// JSON-LD CreativeWorkSeries
+const obraUrl = new URL(`/obras/${obra.id}/`, Astro.site).toString();
+const seriesSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWorkSeries',
+  name: obra.data.titulo,
+  url: obraUrl,
+  inLanguage: 'es-ES',
+  description: obra.data.sinopsis_corta,
+  genre: obra.data.genero,
+  datePublished: obra.data.fecha_inicio
+    ? obra.data.fecha_inicio.toISOString().split('T')[0]
+    : undefined,
+  author: {
+    '@type': 'Person',
+    name: 'Jack B. Lysander',
+    url: new URL('/sobre/', Astro.site).toString(),
+  },
+  hasPart: todos
+    .filter((c) => !c.data.proximo)
+    .map((c) => {
+      const capSlug = c.id.split('/').pop();
+      return {
+        '@type': 'Chapter',
+        name: c.data.titulo,
+        url: new URL(`/obras/${obra.id}/${capSlug}/`, Astro.site).toString(),
+        position: c.data.numero,
+        datePublished: c.data.fecha.toISOString().split('T')[0],
+      };
+    }),
+};
+
+const lomo = obra.data.lomo;
+const coverStyle = lomo
+  ? `--cover-bg:${lomo.color};--cover-accent:${lomo.accent};`
+  : '--cover-bg:#3a322a;--cover-accent:#a87f3a;';
 ---
-<BaseLayout active="home" title={`${obra.data.titulo} — Jack B. Lysander`}
-            description={obra.data.sinopsis_corta}>
-  <main class="view view-obra">
-    <nav class="breadcrumb">
+
+<BaseLayout
+  title={obra.data.titulo}
+  description={obra.data.sinopsis_corta}
+  ogImage={obra.data.imagen_portada}
+  schema={[seriesSchema]}
+  active="obras"
+  wide
+>
+  <article class="view-obra">
+    <nav class="breadcrumb" aria-label="Migas de pan">
       <a href="/">← Obras</a>
     </nav>
 
     <header class="obra-header">
-      <div class="obra-cover" style={`--cover-bg:${obra.data.lomo.color};--cover-accent:${obra.data.lomo.accent};`}>
+      <div class="obra-cover" style={coverStyle}>
         <div class="obra-cover-inner">
           <p class="obra-cover-author">Jack B. Lysander</p>
-          <hr class="obra-cover-rule" />
+          <span class="obra-cover-rule"></span>
           <p class="obra-cover-title">{obra.data.titulo}</p>
-          <div class="obra-cover-fleuron"><Fleuron size={12} opacity={0.7} /></div>
+          <div class="obra-cover-fleuron">
+            <Fleuron size={12} opacity={0.7} />
+          </div>
         </div>
       </div>
 
       <div class="obra-meta">
         <p class="obra-kicker">
-          <span>{obra.data.genero}</span>
-          <span class="dot">·</span>
-          <span class={`estado estado-${estadoSlug(obra.data.estado)}`}>{obra.data.estado}</span>
+          {obra.data.genero && <span>{obra.data.genero}</span>}
+          {obra.data.genero && <span class="dot">·</span>}
+          <span class={`estado estado-${obra.data.estado.toLowerCase().replace(/\s/g, '-').replace(/ó/g, 'o')}`}>
+            {obra.data.estado}
+          </span>
         </p>
         <h1 class="obra-title">{obra.data.titulo}</h1>
-        {(obra.data.sinopsis_larga ?? [obra.data.sinopsis_corta]).map((p) => (
-          <p class="obra-syn">{p}</p>
-        ))}
-        <dl class="obra-stats">
-          <div><dt>Inicio</dt><dd>{obra.data.fecha_inicio ?? '—'}</dd></div>
-          <div><dt>Capítulos</dt><dd>{obra.data.capitulos_publicados}</dd></div>
-          <div><dt>Estado</dt><dd>{obra.data.estado}</dd></div>
-        </dl>
+        <div class="obra-syn prose">
+          {sinopParrafos.map((p) => <p>{p}</p>)}
+        </div>
       </div>
     </header>
 
+    <div class="ornament"><Fleuron size={14} opacity={0.4} /></div>
+
     <section class="capitulos-section">
-      <header class="section-head section-head-left">
+      <header class="section-head">
         <p class="section-kicker">Índice</p>
-        <h2 class="section-title">Capítulos</h2>
+        <h2>Capítulos</h2>
       </header>
 
-      {capitulos.length === 0 ? (
-        <p class="text-soft">Aún no hay capítulos publicados.</p>
+      {todos.length === 0 ? (
+        <p class="text-soft" style="text-align:center;">
+          Aún no hay capítulos publicados.
+        </p>
       ) : (
-        <ol class="capitulos-list">
-          {capitulos.map((c) => {
-            const slugFile = c.slug.split('/').pop();
-            const href = `/obras/${obra.slug}/${slugFile}/`;
+        <ol class="capitulos-grid">
+          {todos.map((c) => {
+            const slugCap = c.id.split('/').pop();
+            const isProximo = c.data.proximo;
+            const href = isProximo ? '#' : `/obras/${obra.id}/${slugCap}/`;
             return (
-              <li class={`capitulo-item ${c.data.proximo ? 'is-next' : ''}`}>
-                <a class={`capitulo-link ${c.data.proximo ? 'is-disabled' : ''}`}
-                   href={c.data.proximo ? '#' : href}
-                   aria-disabled={c.data.proximo ? 'true' : 'false'}>
-                  <span class="capitulo-num">
-                    <span class="capitulo-num-pre">Capítulo</span>
-                    <span class="capitulo-num-roman">{toRoman(c.data.numero)}</span>
-                  </span>
-                  <span class="capitulo-body">
-                    <span class="capitulo-titulo">{c.data.titulo}</span>
-                    <span class="capitulo-syn">{c.data.sinopsis}</span>
-                    <span class="capitulo-meta">
-                      {c.data.proximo ? 'Próximamente' : `${c.data.fecha} · ${c.data.minutos} min de lectura`}
+              <li class={isProximo ? 'is-proximo' : ''}>
+                <a
+                  href={href}
+                  aria-disabled={isProximo ? 'true' : 'false'}
+                  aria-label={isProximo
+                    ? `${c.data.titulo} (próximamente)`
+                    : `Leer capítulo ${c.data.numero}: ${c.data.titulo}`}
+                >
+                  <span class="num">Capítulo {padNum(c.data.numero)}</span>
+                  <span class="titulo">{c.data.titulo}</span>
+                  {c.data.sinopsis && (
+                    <span class="cap-sinopsis">{c.data.sinopsis}</span>
+                  )}
+                  <span class="footer">
+                    <span class="fecha">
+                      {isProximo ? 'Próximamente' : `${fechaFmt(c.data.fecha)} · ${c.data.minutos} min`}
+                    </span>
+                    <span class="cta">
+                      {isProximo ? '—' : <>Leer <span class="arrow">→</span></>}
                     </span>
                   </span>
-                  {!c.data.proximo && <span class="capitulo-arrow" aria-hidden="true">→</span>}
                 </a>
               </li>
             );
@@ -85,5 +163,307 @@ const capitulos = allCaps.sort((a, b) => a.data.numero - b.data.numero);
         </ol>
       )}
     </section>
-  </main>
+
+    {terminos.length > 0 && (
+      <section class="glosario-section">
+        <header class="section-head">
+          <p class="section-kicker">Referencia</p>
+          <h2>Glosario</h2>
+        </header>
+        <a class="glosario-cta" href={`/obras/${obra.id}/glosario/`}>
+          <span class="info">
+            {terminos.length} {terminos.length === 1 ? 'entrada' : 'entradas'}
+            sobre personajes, lugares y términos clave de esta obra.
+          </span>
+          <span class="cta" aria-hidden="true">
+            Ver glosario <span class="arrow">→</span>
+          </span>
+        </a>
+      </section>
+    )}
+  </article>
+
+  <NewsletterCard compact />
 </BaseLayout>
+
+<style>
+  .breadcrumb {
+    margin-bottom: 1.5rem;
+  }
+  .breadcrumb a {
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .breadcrumb a:hover { color: var(--accent); }
+
+  /* ─── Cabecera de obra: cubierta + meta lado a lado ─────────────── */
+  .obra-header {
+    display: grid;
+    grid-template-columns: 230px 1fr;
+    gap: 2.5rem;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .obra-cover {
+    aspect-ratio: 230 / 340;
+    background: var(--cover-bg);
+    border-radius: 4px;
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.25),
+      inset 0 0 60px rgba(0, 0, 0, 0.15),
+      0 14px 28px -10px rgba(0, 0, 0, 0.4);
+    color: color-mix(in srgb, var(--cover-accent) 90%, white);
+    padding: 2rem 1.5rem;
+    display: flex;
+  }
+  .obra-cover-inner {
+    width: 100%;
+    border: 1px solid color-mix(in srgb, var(--cover-accent) 40%, transparent);
+    padding: 2rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+  }
+  .obra-cover-author {
+    font-family: var(--sans);
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin: 0;
+    opacity: 0.85;
+  }
+  .obra-cover-rule {
+    display: block;
+    width: 28px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.5;
+    margin: 0.6rem auto;
+  }
+  .obra-cover-title {
+    font-family: var(--display);
+    font-size: 1.55rem;
+    font-weight: 500;
+    line-height: 1.15;
+    margin: 0;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+  }
+  .obra-cover-fleuron {
+    color: currentColor;
+    opacity: 0.7;
+  }
+  .obra-meta {
+    min-width: 0;
+  }
+  .obra-kicker {
+    font-family: var(--sans);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    margin: 0 0 0.5rem;
+  }
+  .obra-kicker .estado-en-publicacion { color: var(--accent); }
+  .obra-kicker .estado-proximamente,
+  .obra-kicker .estado-borrador { opacity: 0.7; }
+  .obra-title {
+    font-family: var(--display);
+    font-size: 2.4rem;
+    font-weight: 500;
+    line-height: 1.1;
+    margin: 0 0 1rem;
+  }
+  .obra-syn {
+    max-width: none;
+  }
+  .obra-syn p {
+    margin: 0 0 0.8em;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+
+  @media (max-width: 700px) {
+    .obra-header {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .obra-cover {
+      max-width: 200px;
+      margin: 0 auto;
+    }
+    .obra-title { font-size: 2rem; }
+  }
+
+  .ornament {
+    color: var(--ink-faint);
+    margin: 2.5rem auto;
+    text-align: center;
+  }
+
+  /* ─── Sección con cabecera ──────────────────────────────────────── */
+  .section-head {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .section-kicker {
+    font-family: var(--sans);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
+  }
+  .section-head h2 {
+    font-family: var(--display);
+    font-size: 1.7rem;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  /* ─── Grid de capítulos ─────────────────────────────────────────── */
+  .capitulos-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  @media (max-width: 800px) {
+    .capitulos-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 520px) {
+    .capitulos-grid { grid-template-columns: 1fr; }
+  }
+  .capitulos-grid li.is-proximo a {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  .capitulos-grid a {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper);
+    text-decoration: none;
+    color: var(--ink);
+    transition: background-color 120ms ease, border-color 120ms ease;
+  }
+  .capitulos-grid li:not(.is-proximo) a:hover {
+    background: var(--bg-soft);
+    border-color: var(--accent);
+  }
+  .capitulos-grid li:not(.is-proximo) a:hover .num,
+  .capitulos-grid li:not(.is-proximo) a:hover .cta {
+    color: var(--accent);
+  }
+  .capitulos-grid li:not(.is-proximo) a:hover .arrow {
+    transform: translateX(3px);
+  }
+  .capitulos-grid .num {
+    font-family: var(--display);
+    font-size: 1.4rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--ink);
+    margin-bottom: 0.15rem;
+    transition: color 120ms ease;
+  }
+  .capitulos-grid .titulo {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.35;
+    color: var(--ink-soft);
+    margin-bottom: 0.7rem;
+  }
+  .capitulos-grid .cap-sinopsis {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    line-height: 1.45;
+    flex: 1;
+    margin-bottom: 0.9rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .capitulos-grid .footer {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 0.45rem;
+    border-top: 1px solid var(--rule);
+  }
+  .capitulos-grid .fecha {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+  .capitulos-grid .cta {
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    transition: color 120ms ease;
+  }
+  .capitulos-grid .arrow {
+    display: inline-block;
+    transition: transform 120ms ease;
+  }
+
+  /* ─── CTA al glosario ────────────────────────────────────────────── */
+  .glosario-section {
+    max-width: var(--measure);
+    margin: var(--space-lg) auto 0;
+  }
+  .glosario-cta {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    padding: 1.1rem 1.25rem;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    transition: background-color 120ms ease, border-color 120ms ease;
+  }
+  .glosario-cta:hover {
+    background: var(--bg-soft);
+    border-color: var(--accent);
+  }
+  .glosario-cta:hover .cta { color: var(--accent); }
+  .glosario-cta:hover .arrow { transform: translateX(3px); }
+  .glosario-cta .info {
+    font-family: var(--serif);
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .glosario-cta .cta {
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    transition: color 120ms ease;
+  }
+  .glosario-cta .arrow {
+    display: inline-block;
+    transition: transform 120ms ease;
+  }
+</style>

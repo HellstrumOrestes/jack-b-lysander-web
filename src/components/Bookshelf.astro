@@ -1,6 +1,12 @@
 ---
-// Estantería de obras: lomos verticales sobre balda de madera.
-// Recibe `obras` (collection entries de `obras`) ya ordenadas.
+// Estantería de obras.
+// Desktop: lomos verticales sobre balda. Cada lomo es un enlace.
+// Mobile: cubiertas horizontales (cards rectangulares) en columna,
+//   con color y acento del lomo, título y meta. Mismo enlace.
+//
+// Sin JavaScript: el "panel info" del design original se elimina; la
+// info de cada obra ya está en su página propia, y al hover sobre el
+// lomo aparece el título del libro como tooltip nativo (atributo title).
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -8,37 +14,27 @@ interface Props {
 }
 const { obras } = Astro.props;
 
-const widths = [56, 50, 62, 54, 48, 58, 52];
----
-<div class="bookshelf" data-bookshelf>
-  <div class="shelf-card" aria-live="polite" data-shelf-card>
-    {obras.map((o, i) => (
-      <div class="shelf-card-panel" data-idx={i} hidden={i !== 0}>
-        <p class="shelf-card-meta">
-          <span>{o.data.genero}</span>
-          <span class="dot">·</span>
-          <span class={`estado estado-${o.data.estado.toLowerCase().replace(/\s/g,'-')}`}>{o.data.estado}</span>
-        </p>
-        <h3 class="shelf-card-title">{o.data.titulo}</h3>
-        <p class="shelf-card-syn">{o.data.sinopsis_corta}</p>
-        <a class="shelf-card-cta" href={`/obras/${o.slug}/`}>
-          Abrir obra <span class="arrow">→</span>
-        </a>
-      </div>
-    ))}
-  </div>
+// Anchos variables de los lomos en desktop (efecto de estantería real)
+const widths = [62, 54, 70, 58, 50, 66, 56];
 
-  <div class="shelf">
+// Lomo por defecto si la obra no declara colores (genérico literario)
+const fallbackLomo = { color: '#3a322a', accent: '#a87f3a', alto: 0.92 };
+---
+
+<div class="bookshelf">
+  <!-- Vista escritorio: estantería con lomos verticales -->
+  <div class="shelf" aria-label="Estantería de obras">
     <div class="shelf-books">
       {obras.map((o, i) => {
-        const altoPct = Math.round((o.data.lomo.alto ?? 0.95) * 100);
+        const lomo = o.data.lomo ?? fallbackLomo;
+        const altoPct = Math.round((lomo.alto ?? 0.95) * 100);
         const w = widths[i % widths.length];
         return (
           <a
-            class={`spine ${i === 0 ? 'active' : ''}`}
-            href={`/obras/${o.slug}/`}
-            data-idx={i}
-            style={`width:${w}px;height:${altoPct}%;--spine-bg:${o.data.lomo.color};--spine-accent:${o.data.lomo.accent};`}
+            class="spine"
+            href={`/obras/${o.id}/`}
+            title={o.data.titulo}
+            style={`--spine-w:${w}px;--spine-h:${altoPct}%;--spine-bg:${lomo.color};--spine-accent:${lomo.accent};`}
             aria-label={o.data.titulo}
           >
             <span class="spine-title">{o.data.titulo}</span>
@@ -47,48 +43,200 @@ const widths = [56, 50, 62, 54, 48, 58, 52];
           </a>
         );
       })}
-      <span class="spine-gap" aria-hidden="true" />
     </div>
-    <div class="shelf-board" aria-hidden="true" />
-    <div class="shelf-shadow" aria-hidden="true" />
+    <div class="shelf-board" aria-hidden="true"></div>
+    <div class="shelf-shadow" aria-hidden="true"></div>
   </div>
 
-  <div class="shelf-dots" role="tablist">
-    {obras.map((o, i) => (
-      <button type="button" role="tab"
-              class={`shelf-dot ${i === 0 ? 'active' : ''}`}
-              data-idx={i}
-              aria-selected={i === 0}
-              aria-label={`Mostrar ${o.data.titulo}`} />
-    ))}
-  </div>
+  <!-- Vista móvil: cubiertas horizontales -->
+  <ul class="covers">
+    {obras.map((o) => {
+      const lomo = o.data.lomo ?? fallbackLomo;
+      return (
+        <li>
+          <a
+            class="cover"
+            href={`/obras/${o.id}/`}
+            style={`--cover-bg:${lomo.color};--cover-accent:${lomo.accent};`}
+          >
+            <span class="cover-author">Jack B. Lysander</span>
+            <span class="cover-rule" aria-hidden="true"></span>
+            <span class="cover-title">{o.data.titulo}</span>
+            <span class="cover-meta">
+              {o.data.genero ? `${o.data.genero} · ` : ''}{o.data.estado}
+            </span>
+          </a>
+        </li>
+      );
+    })}
+  </ul>
 </div>
 
-<script>
-  // Activar lomo en hover/focus/click sobre dot, mostrar panel correspondiente.
-  document.querySelectorAll('[data-bookshelf]').forEach((root) => {
-    const spines = root.querySelectorAll('.spine');
-    const dots   = root.querySelectorAll('.shelf-dot');
-    const panels = root.querySelectorAll('.shelf-card-panel');
+<style>
+  /* ─── Estantería desktop ─────────────────────────────────────────── */
+  .shelf {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    margin: 0 auto;
+    max-width: 760px;
+  }
+  .shelf-books {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 6px;
+    height: 280px;
+    padding: 0 10px;
+  }
+  .spine {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.4rem 0.5rem 1.1rem;
+    width: var(--spine-w, 56px);
+    height: var(--spine-h, 100%);
+    background: var(--spine-bg);
+    color: color-mix(in srgb, var(--spine-accent) 88%, white);
+    text-decoration: none;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+      inset -1px 0 0 rgba(255, 255, 255, 0.05),
+      0 12px 14px -8px rgba(0, 0, 0, 0.45);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    cursor: pointer;
+  }
+  .spine:hover,
+  .spine:focus-visible {
+    transform: translateY(-6px);
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+      inset -1px 0 0 rgba(255, 255, 255, 0.08),
+      0 18px 22px -10px rgba(0, 0, 0, 0.5);
+    outline: none;
+  }
+  .spine-title {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: var(--display);
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    line-height: 1.05;
+    text-align: center;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    max-height: 70%;
+  }
+  .spine-author {
+    font-family: var(--sans);
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+  .spine-bands {
+    position: absolute;
+    inset: auto 6px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: none;
+  }
+  .spine-bands span {
+    height: 1px;
+    background: var(--spine-accent);
+    opacity: 0.55;
+  }
+  .shelf-board {
+    height: 14px;
+    background:
+      linear-gradient(180deg, #6b4a2e, #4f3520);
+    border-radius: 2px;
+    box-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.25),
+      0 6px 14px -2px rgba(0, 0, 0, 0.35);
+    margin-top: 4px;
+  }
+  html[data-theme="dark"] .shelf-board {
+    background: linear-gradient(180deg, #3d2a1c, #261913);
+  }
+  .shelf-shadow {
+    height: 30px;
+    background: radial-gradient(
+      ellipse at center top,
+      rgba(0, 0, 0, 0.25),
+      transparent 70%
+    );
+    margin-top: -10px;
+  }
 
-    function setActive(idx: number) {
-      spines.forEach((s, i) => s.classList.toggle('active', i === idx));
-      dots.forEach((d, i) => {
-        d.classList.toggle('active', i === idx);
-        d.setAttribute('aria-selected', String(i === idx));
-      });
-      panels.forEach((p, i) => {
-        if (i === idx) p.removeAttribute('hidden');
-        else p.setAttribute('hidden', '');
-      });
-    }
+  /* ─── Cubiertas mobile ───────────────────────────────────────────── */
+  .covers {
+    display: none;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 1.4rem 1.5rem;
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: color-mix(in srgb, var(--cover-accent) 92%, white);
+    background: var(--cover-bg);
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    box-shadow:
+      inset 0 0 0 2px color-mix(in srgb, var(--cover-accent) 40%, transparent),
+      0 4px 12px -4px rgba(0, 0, 0, 0.35);
+    min-height: 130px;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+  }
+  .cover:active {
+    transform: scale(0.99);
+  }
+  .cover-author {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .cover-rule {
+    width: 36px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.5;
+    margin: 0.45rem 0;
+  }
+  .cover-title {
+    font-family: var(--display);
+    font-size: 1.55rem;
+    font-weight: 500;
+    line-height: 1.15;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+  }
+  .cover-meta {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    opacity: 0.85;
+    margin-top: 0.4rem;
+  }
 
-    spines.forEach((s, i) => {
-      s.addEventListener('mouseenter', () => setActive(i));
-      s.addEventListener('focus', () => setActive(i));
-    });
-    dots.forEach((d, i) => {
-      d.addEventListener('click', () => setActive(i));
-    });
-  });
-</script>
+  /* ─── Switch desktop / mobile ────────────────────────────────────── */
+  @media (max-width: 720px) {
+    .shelf { display: none; }
+    .covers { display: flex; }
+  }
+</style>

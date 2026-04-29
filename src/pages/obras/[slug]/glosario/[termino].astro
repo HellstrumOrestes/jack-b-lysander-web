@@ -1,13 +1,12 @@
 ---
 // Página individual de un término del glosario.
-// Ruta: /obras/[slug-obra]/glosario/[termino]/
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import Fleuron from '../../../../components/Fleuron.astro';
 
 export async function getStaticPaths() {
   const obras = await getCollection('obras');
   const obrasMap = new Map(obras.map((o) => [o.id, o]));
-
   const terminos = await getCollection('glosario');
 
   const paths = [];
@@ -15,7 +14,7 @@ export async function getStaticPaths() {
     const obra = obrasMap.get(t.data.obra);
     if (!obra) {
       throw new Error(
-        `Término del glosario "${t.id}" referencia obra "${t.data.obra}" que no existe en src/content/obras/.`,
+        `Término del glosario "${t.id}" referencia obra "${t.data.obra}" que no existe.`,
       );
     }
     const tSlug = t.id.split('/').pop() as string;
@@ -30,8 +29,6 @@ export async function getStaticPaths() {
 const { termino, obra } = Astro.props;
 const { Content } = await render(termino);
 
-// JSON-LD: definición del término dentro de la obra. Usamos DefinedTerm
-// para que motores y LLMs entiendan que es una entrada de glosario.
 const terminoSchema = {
   '@context': 'https://schema.org',
   '@type': 'DefinedTerm',
@@ -50,19 +47,21 @@ const terminoSchema = {
   title={`${termino.data.termino} · Glosario · ${obra.data.titulo}`}
   description={termino.data.descripcion_corta}
   schema={[terminoSchema]}
+  active="obras"
 >
-  <article>
-    <nav class="breadcrumb" aria-label="Migas de pan">
-      <a href="/obras/">Obras</a>
-      <span aria-hidden="true">›</span>
-      <a href={`/obras/${obra.id}/`}>{obra.data.titulo}</a>
-      <span aria-hidden="true">›</span>
-      <a href={`/obras/${obra.id}/glosario/`}>Glosario</a>
-    </nav>
+  <nav class="breadcrumb" aria-label="Migas de pan">
+    <a href="/">Obras</a>
+    <span class="sep" aria-hidden="true">/</span>
+    <a href={`/obras/${obra.id}/`}>{obra.data.titulo}</a>
+    <span class="sep" aria-hidden="true">/</span>
+    <a href={`/obras/${obra.id}/glosario/`}>Glosario</a>
+  </nav>
 
+  <article class="termino">
     <header class="head">
-      <p class="meta">Glosario · {obra.data.titulo}</p>
+      <p class="kicker">Glosario · {obra.data.titulo}</p>
       <h1>{termino.data.termino}</h1>
+      <div class="orn"><Fleuron size={14} opacity={0.5} /></div>
     </header>
 
     <div class="prose">
@@ -79,40 +78,51 @@ const terminoSchema = {
 
 <style>
   .breadcrumb {
-    margin-bottom: var(--space-md);
+    margin-bottom: 1.25rem;
+    font-family: var(--sans);
+    font-size: 0.88rem;
     text-align: center;
   }
-  .breadcrumb a { color: var(--color-text-soft); text-decoration: none; }
-  .breadcrumb a:hover { color: var(--color-accent); }
-  .breadcrumb span { margin: 0 0.4rem; }
+  .breadcrumb a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb .sep {
+    margin: 0 0.5rem;
+    color: var(--ink-faint);
+  }
 
   .head {
     text-align: center;
-    margin-bottom: var(--space-lg);
+    margin: 1.5rem auto 2.5rem;
+    max-width: var(--measure);
   }
-  .meta {
-    font-family: var(--font-sans);
+  .kicker {
+    font-family: var(--sans);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.78rem;
-    color: var(--color-text-soft);
-    margin: 0 0 0.3rem;
+    letter-spacing: 0.16em;
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+    margin: 0 0 0.5rem;
   }
   .head h1 {
+    font-family: var(--display);
     font-size: 2.2rem;
-    margin: 0;
+    font-weight: 500;
+    margin: 0 0 0.6rem;
+    line-height: 1.1;
   }
+  .orn { color: var(--ink-faint); }
 
   .back {
     text-align: center;
-    font-family: var(--font-sans);
+    font-family: var(--sans);
     font-size: 0.9rem;
   }
   .back a {
-    color: var(--color-text-soft);
+    color: var(--ink-soft);
     text-decoration: none;
   }
-  .back a:hover {
-    color: var(--color-accent);
-  }
+  .back a:hover { color: var(--accent); }
 </style>

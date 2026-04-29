@@ -1,14 +1,13 @@
-// Plugin Rehype: enriquece los enlaces que apuntan a páginas del glosario
+// Plugin Rehype: enriquece enlaces que apuntan a páginas del glosario
 // con un atributo data-tooltip y la clase glosario-link, para que el CSS
-// puro pinte un tooltip con la descripción corta al pasar el ratón.
+// puro pinte un tooltip con la descripción corta al hover. En móvil,
+// GlosarioPin.astro intercepta el click y muestra un panel con la misma
+// info + botón a la página completa.
 //
 // Detecta enlaces cuyo href tiene la forma:
 //   /obras/<obra-slug>/glosario/<termino-slug>/
-// y los enriquece con la descripcion_corta declarada en el frontmatter
-// del archivo correspondiente en src/content/glosario/<obra>/<termino>.md
-//
-// El tooltip funciona solo en desktop (CSS :hover). En móvil/tablet, el
-// tap sigue navegando a la página completa del término.
+// y busca la `descripcion_corta` en el frontmatter del archivo
+// correspondiente en src/content/glosario/<obra>/<termino>.md
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
@@ -19,7 +18,6 @@ const GLOSARIO_DIR = fileURLToPath(
   new URL('../src/content/glosario/', import.meta.url),
 );
 
-// Cache: el mapa solo se construye una vez por proceso de build.
 let cachedMap = null;
 
 function loadGlosarioMap() {
@@ -30,7 +28,6 @@ function loadGlosarioMap() {
   try {
     obras = readdirSync(GLOSARIO_DIR);
   } catch {
-    // Si la carpeta no existe (p. ej. proyecto sin glosario), no hay nada que hacer.
     cachedMap = map;
     return map;
   }
@@ -52,8 +49,6 @@ function loadGlosarioMap() {
       const fullPath = join(obraDir, file);
       const contents = readFileSync(fullPath, 'utf-8');
 
-      // Extraer descripcion_corta del frontmatter. Aceptamos comillas dobles,
-      // simples o sin comillas (formato YAML inline simple).
       const m = contents.match(
         /^descripcion_corta:\s*(?:"([^"]+)"|'([^']+)'|(.+?))\s*$/m,
       );
@@ -83,7 +78,6 @@ export default function rehypeGlosario() {
       const desc = map.get(href);
       if (!desc) return;
 
-      // Añadir clase 'glosario-link' sin pisar las que ya tuviera.
       const existing = node.properties.className;
       const classes = Array.isArray(existing)
         ? [...existing, 'glosario-link']
@@ -91,8 +85,6 @@ export default function rehypeGlosario() {
           ? [existing, 'glosario-link']
           : ['glosario-link'];
       node.properties.className = classes;
-
-      // El tooltip se pinta vía CSS leyendo data-tooltip.
       node.properties['data-tooltip'] = desc;
     });
   };

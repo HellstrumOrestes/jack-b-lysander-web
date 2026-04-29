@@ -1,10 +1,12 @@
 ---
-obra: samantha-solstice
+obra: "samantha-solstice"
 numero: 1
-titulo: La caja sin remitente
-fecha: 28 abr 2026
-sinopsis: Samantha encuentra un libro que no debería existir.
+titulo: "La caja sin remitente"
+fecha: 2026-04-28
+sinopsis: "Samantha encuentra un libro que no debería existir."
 minutos: 6
+proximo: false
+borrador: false
 ---
 
 La caja llegó un martes, justo cuando la lluvia empezaba a apretar contra los ventanales del depósito. No tenía remitente, ni sello, ni siquiera una de esas etiquetas amarillas que el servicio nocturno solía pegar en las esquinas. {Samantha:samantha} la dejó sobre la mesa y se quedó mirándola un minuto largo, escuchando el goteo del techo y el zumbido de los fluorescentes.

@@ -1,6 +1,6 @@
 // Endpoint llms.txt — descripción del sitio para LLMs siguiendo la
 // convención de https://llmstxt.org. Se regenera en cada build con
-// las obras y capítulos publicados (no borradores).
+// las obras y capítulos publicados.
 
 import type { APIContext } from 'astro';
 import { getCollection } from 'astro:content';
@@ -12,11 +12,17 @@ export async function GET(context: APIContext) {
     const oa = a.data.orden ?? 999;
     const ob = b.data.orden ?? 999;
     if (oa !== ob) return oa - ob;
-    return b.data.fecha_inicio.getTime() - a.data.fecha_inicio.getTime();
+    const fa = a.data.fecha_inicio?.getTime() ?? 0;
+    const fb = b.data.fecha_inicio?.getTime() ?? 0;
+    return fb - fa;
   });
 
-  const capitulos = (await getCollection('capitulos', (c) => c.data.borrador !== true))
-    .sort((a, b) => a.data.numero - b.data.numero);
+  const capitulos = (
+    await getCollection(
+      'capitulos',
+      (c) => c.data.borrador !== true && c.data.proximo !== true,
+    )
+  ).sort((a, b) => a.data.numero - b.data.numero);
 
   const capsPorObra = new Map<string, typeof capitulos>();
   for (const c of capitulos) {
@@ -28,7 +34,9 @@ export async function GET(context: APIContext) {
   const lines: string[] = [];
   lines.push('# Jack B. Lysander');
   lines.push('');
-  lines.push('> Ficción serializada en español por Jack B. Lysander (pseudónimo literario). Las obras se publican capítulo a capítulo en este sitio. Idioma del contenido: español de España.');
+  lines.push(
+    '> Ficción serializada en español por Jack B. Lysander (pseudónimo literario). Las obras se publican capítulo a capítulo en este sitio. Idioma del contenido: español de España.',
+  );
   lines.push('');
   lines.push('## Sobre el autor');
   lines.push('');

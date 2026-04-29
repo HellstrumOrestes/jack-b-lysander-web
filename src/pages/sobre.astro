@@ -1,38 +1,77 @@
 ---
+// Página "Sobre mí". Carga el contenido desde src/sobre.md.
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsletterCard from '../components/NewsletterCard.astro';
 import Fleuron from '../components/Fleuron.astro';
+
+let Content: any = null;
+let frontmatter: any = {};
+try {
+  const mod: any = await import('../sobre.md');
+  Content = mod.Content;
+  frontmatter = mod.frontmatter ?? {};
+} catch {
+  // Si no existe el archivo, mostramos placeholder.
+}
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Jack B. Lysander',
+  description: frontmatter.descripcion ?? 'Autor de ficción serializada en español.',
+  url: new URL('/sobre/', Astro.site).toString(),
+  inLanguage: 'es-ES',
+};
 ---
-<BaseLayout active="sobre" title="Sobre — Jack B. Lysander">
-  <main class="view view-sobre">
-    <article class="sobre">
-      <p class="capitulo-header-kicker">Sobre</p>
-      <h1 class="sobre-title">El autor</h1>
-      <div class="capitulo-header-orn"><Fleuron size={14} opacity={0.5} /></div>
-      <div class="prose">
-        <p>
-          Jack B. Lysander es el pseudónimo bajo el que publico ficción en
-          español. Aquí no hay biografía oficial todavía, ni foto, ni
-          bibliografía cerrada: solo historias en marcha y la voluntad de
-          contarlas con calma.
+
+<BaseLayout
+  title={frontmatter.titulo ?? 'Sobre mí'}
+  description={frontmatter.descripcion ?? 'Sobre Jack B. Lysander.'}
+  schema={[personSchema]}
+  active="sobre"
+>
+  <article class="sobre">
+    <header class="head">
+      <p class="kicker">Sobre</p>
+      <h1>{frontmatter.titulo ?? 'Sobre mí'}</h1>
+      <div class="orn"><Fleuron size={14} opacity={0.5} /></div>
+    </header>
+
+    <div class="prose">
+      {Content ? <Content /> : (
+        <p class="text-soft">
+          (Falta el archivo <code>src/sobre.md</code>.)
         </p>
-        <p>
-          Escribo lento, publico despacio. Cada capítulo se cuece durante
-          semanas, a veces meses. Lo que aparece aquí ya pasó por varias
-          relecturas; lo que no aparece todavía probablemente esté siendo
-          reescrito por tercera vez.
-        </p>
-        <p>
-          Si quieres saber cuándo publico un capítulo nuevo, lo más sencillo
-          es suscribirte a la newsletter. No mando nada más que avisos de
-          capítulos. Sin spam, sin notas promocionales, sin tracking.
-        </p>
-        <p>
-          Para cualquier cosa, podés escribirme a
-          <a href="mailto:hola@jacklysander.com">hola@jacklysander.com</a>.
-        </p>
-      </div>
-    </article>
-    <NewsletterCard />
-  </main>
+      )}
+    </div>
+  </article>
+
+  <NewsletterCard compact />
 </BaseLayout>
+
+<style>
+  .head {
+    text-align: center;
+    margin: 1.5rem auto 2.5rem;
+    max-width: var(--measure);
+  }
+  .kicker {
+    font-family: var(--sans);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
+  }
+  .head h1 {
+    font-family: var(--display);
+    font-size: 2.4rem;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.1;
+  }
+  .orn {
+    color: var(--ink-faint);
+    margin-top: 0.6rem;
+  }
+</style>

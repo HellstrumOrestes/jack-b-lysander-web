@@ -1,4 +1,5 @@
-// Feed RSS con todos los capítulos publicados, descendente por fecha.
+// Feed RSS con todos los capítulos publicados (no borrador, no próximo),
+// descendente por fecha.
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
@@ -7,8 +8,12 @@ export async function GET(context: APIContext) {
   const obras = await getCollection('obras');
   const obrasMap = new Map(obras.map((o) => [o.id, o.data.titulo]));
 
-  const capitulos = (await getCollection('capitulos', (c) => c.data.borrador !== true))
-    .sort((a, b) => b.data.fecha.getTime() - a.data.fecha.getTime());
+  const capitulos = (
+    await getCollection(
+      'capitulos',
+      (c) => c.data.borrador !== true && c.data.proximo !== true,
+    )
+  ).sort((a, b) => b.data.fecha.getTime() - a.data.fecha.getTime());
 
   return rss({
     title: 'Jack B. Lysander',

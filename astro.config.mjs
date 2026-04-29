@@ -1,14 +1,29 @@
 import { defineConfig } from 'astro/config';
-import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+import remarkGlosario from './plugins/remark-glosario.mjs';
+import rehypeGlosario from './plugins/rehype-glosario.mjs';
 
-// Cambia site cuando despliegues (p. ej. https://jacklysander.com)
+// El sitio se sirve desde dominio personalizado (CNAME en public/),
+// por eso `site` apunta a https://jackblysander.com.
 export default defineConfig({
-  site: 'https://jacklysander.com',
-  integrations: [mdx(), sitemap()],
+  site: 'https://jackblysander.com',
+  trailingSlash: 'always',
+  build: {
+    format: 'directory',
+  },
   markdown: {
     smartypants: true,
-    remarkPlugins: [],
-    rehypePlugins: [],
+    remarkPlugins: [remarkGlosario],
+    rehypePlugins: [rehypeGlosario],
   },
+  integrations: [
+    sitemap({
+      filter: (page) =>
+        !page.includes('/rss.xml') && !page.includes('/llms.txt'),
+      i18n: {
+        defaultLocale: 'es',
+        locales: { es: 'es-ES' },
+      },
+    }),
+  ],
 });

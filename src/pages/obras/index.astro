@@ -1,36 +1,64 @@
 ---
-// Página índice de todas las obras.
+// Página índice de obras (alternativa a la home si alguien quiere
+// llegar directo). Misma estantería que la home.
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import ObraCard from '../../components/ObraCard.astro';
+import Bookshelf from '../../components/Bookshelf.astro';
 
 const obras = (await getCollection('obras')).sort((a, b) => {
   const oa = a.data.orden ?? 999;
   const ob = b.data.orden ?? 999;
   if (oa !== ob) return oa - ob;
-  return b.data.fecha_inicio.getTime() - a.data.fecha_inicio.getTime();
+  const fa = a.data.fecha_inicio?.getTime() ?? 0;
+  const fb = b.data.fecha_inicio?.getTime() ?? 0;
+  return fb - fa;
 });
 ---
 
-<BaseLayout title="Obras" description="Listado de obras de Jack B. Lysander.">
-  <h1>Obras</h1>
-  <p class="text-soft intro">
-    Todas las obras publicadas, en publicación o en pausa.
-  </p>
+<BaseLayout
+  title="Obras"
+  description="Listado de obras de Jack B. Lysander."
+  active="obras"
+  wide
+>
+  <header class="head">
+    <p class="kicker">Obras</p>
+    <h1>La estantería</h1>
+    <p class="text-soft intro">
+      Todas las obras publicadas, en publicación, en pausa o próximas.
+    </p>
+  </header>
 
   {obras.length === 0 ? (
-    <p class="text-soft">Aún no hay obras publicadas.</p>
+    <p class="text-soft" style="text-align:center;">
+      Aún no hay obras publicadas.
+    </p>
   ) : (
-    <div class="obras-list">
-      {obras.map((obra) => <ObraCard obra={obra} />)}
-    </div>
+    <Bookshelf obras={obras} />
   )}
 </BaseLayout>
 
 <style>
-  h1 { text-align: center; }
-  .intro {
+  .head {
     text-align: center;
-    margin-bottom: var(--space-md);
+    margin-bottom: 2rem;
+  }
+  .kicker {
+    font-family: var(--sans);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
+  }
+  .head h1 {
+    font-family: var(--display);
+    font-size: 2.2rem;
+    font-weight: 500;
+    margin: 0 0 0.6rem;
+  }
+  .intro {
+    margin: 0 auto;
+    max-width: 50ch;
   }
 </style>

@@ -1,8 +1,8 @@
 ---
-titulo: Cuentos de la línea doce
-sinopsis_corta: Once relatos breves ambientados en la última línea de tranvía de una ciudad imaginaria.
-genero: Cuentos
-estado: Borrador
+titulo: "Cuentos de la línea doce"
+sinopsis_corta: "Once relatos breves ambientados en la última línea de tranvía de una ciudad imaginaria."
+genero: "Cuentos"
+estado: "Borrador"
 capitulos_publicados: 0
 orden: 3
 lomo:

@@ -1,21 +1,50 @@
 ---
+// Pie de página minimalista. RSS no aparece visible (se descubre solo
+// vía <link rel="alternate"> en BaseLayout).
 import Fleuron from './Fleuron.astro';
 const year = new Date().getFullYear();
 ---
+
 <footer class="site-footer">
   <div class="footer-inner">
     <Fleuron size={14} opacity={0.35} />
     <p class="footer-line">
-      <span>Jack B. Lysander</span>
-      <span class="dot">·</span>
-      <span>Ficción serializada en español</span>
+      <a href="/sobre/">Sobre mí</a>
     </p>
     <p class="footer-meta">
-      <a href="/rss.xml">RSS</a>
-      <span class="dot">·</span>
-      <a href="/newsletter">Newsletter</a>
-      <span class="dot">·</span>
-      <span>© {year}</span>
+      &copy; {year} Jack B. Lysander
     </p>
   </div>
 </footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--rule);
+    margin-top: var(--space-xl);
+    padding: 2rem 1.5rem 2.5rem;
+    font-family: var(--sans);
+    color: var(--ink-soft);
+  }
+  .footer-inner {
+    max-width: var(--wide-w);
+    margin: 0 auto;
+    text-align: center;
+    color: var(--ink-faint);
+  }
+  .footer-line {
+    margin: 1rem 0 0.4rem;
+  }
+  .footer-line a {
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .footer-line a:hover {
+    color: var(--accent);
+  }
+  .footer-meta {
+    margin: 0;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+  }
+</style>

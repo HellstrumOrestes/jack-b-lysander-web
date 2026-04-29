@@ -1,17 +1,6 @@
 ---
 // Componente SEO central: title, description, canonical, Open Graph,
 // Twitter Cards y JSON-LD. Cada página le pasa sus props específicas.
-//
-// Props:
-//   - title: si rawTitle=false (por defecto), se le añade " — Jack B. Lysander".
-//   - description: meta description y og:description.
-//   - ogImage: ruta absoluta o URL de la imagen Open Graph (1200×630 recomendado).
-//   - type: 'website' (default) o 'article' (capítulos).
-//   - publishedTime / modifiedTime: para article, en ISO 8601 (opcional).
-//   - schema: array de objetos JSON-LD adicionales para esta página
-//     (Person, CreativeWorkSeries, Chapter, etc.). Se serializan tal cual.
-//
-// El schema WebSite global se añade automáticamente en todas las páginas.
 
 interface Props {
   title: string;
@@ -29,7 +18,6 @@ const {
   description,
   rawTitle = false,
   // TODO: sustituir por imagen Open Graph definitiva 1200×630 px
-  // (cuando el autor proporcione el archivo, p. ej. /og-default.png).
   ogImage = '/logo-transparent.png',
   type = 'website',
   publishedTime,
@@ -59,12 +47,10 @@ const websiteSchema = {
 const allSchemas = [websiteSchema, ...schema];
 ---
 
-<!-- Básicos -->
 <title>{fullTitle}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical} />
 
-<!-- Open Graph -->
 <meta property="og:type" content={type} />
 <meta property="og:title" content={fullTitle} />
 <meta property="og:description" content={description} />
@@ -82,13 +68,11 @@ const allSchemas = [websiteSchema, ...schema];
   <meta property="article:author" content={SITE_NAME} />
 )}
 
-<!-- Twitter Cards -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={fullTitle} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={ogImageUrl} />
 
-<!-- JSON-LD -->
 {allSchemas.map((s) => (
   <script type="application/ld+json" set:html={JSON.stringify(s)} />
 ))}

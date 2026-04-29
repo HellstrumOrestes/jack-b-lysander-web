@@ -1,8 +1,8 @@
 ---
-// Página índice del glosario de una obra: lista todos los términos
-// con su descripción corta y enlace a la página individual.
-import { getCollection, getEntry } from 'astro:content';
+// Página índice del glosario de una obra: grid de cards 3/2/1 columnas.
+import { getCollection } from 'astro:content';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import Fleuron from '../../../../components/Fleuron.astro';
 
 export async function getStaticPaths() {
   const obras = await getCollection('obras');
@@ -14,96 +14,106 @@ export async function getStaticPaths() {
 
 const { obra } = Astro.props;
 
-// Términos pertenecientes a esta obra, ordenados alfabéticamente.
 const terminos = (await getCollection('glosario', (t) => t.data.obra === obra.id))
   .sort((a, b) =>
     a.data.termino.localeCompare(b.data.termino, 'es', { sensitivity: 'base' }),
   );
-
-const padNum = (n: number) => String(n).padStart(2, '0');
 ---
 
 <BaseLayout
   title={`Glosario · ${obra.data.titulo}`}
   description={`Glosario de términos, personajes y lugares de ${obra.data.titulo}.`}
+  active="obras"
   wide
 >
-  <article>
-    <nav class="breadcrumb" aria-label="Migas de pan">
-      <a href="/obras/">Obras</a>
-      <span aria-hidden="true">›</span>
-      <a href={`/obras/${obra.id}/`}>{obra.data.titulo}</a>
-    </nav>
+  <nav class="breadcrumb" aria-label="Migas de pan">
+    <a href="/">Obras</a>
+    <span class="sep" aria-hidden="true">/</span>
+    <a href={`/obras/${obra.id}/`}>{obra.data.titulo}</a>
+  </nav>
 
-    <header class="head">
-      <p class="meta">Glosario</p>
-      <h1>{obra.data.titulo}</h1>
-    </header>
+  <header class="head">
+    <p class="kicker">{obra.data.titulo}</p>
+    <h1>Glosario</h1>
+    <div class="orn"><Fleuron size={14} opacity={0.5} /></div>
+  </header>
 
-    {terminos.length === 0 ? (
-      <p class="text-soft empty">Aún no hay términos en el glosario.</p>
-    ) : (
-      <ul class="terminos-grid">
-        {terminos.map((t) => {
-          const tSlug = t.id.split('/').pop();
-          return (
-            <li>
-              <a
-                href={`/obras/${obra.id}/glosario/${tSlug}/`}
-                aria-label={`Ver entrada del glosario: ${t.data.termino}`}
-              >
-                <span class="termino">{t.data.termino}</span>
-                <span class="cap-sinopsis">{t.data.descripcion_corta}</span>
-                <span class="cta" aria-hidden="true">
-                  Ver <span class="arrow">→</span>
-                </span>
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-    )}
-  </article>
+  {terminos.length === 0 ? (
+    <p class="text-soft empty">Aún no hay términos en el glosario.</p>
+  ) : (
+    <ul class="terminos-grid">
+      {terminos.map((t) => {
+        const tSlug = t.id.split('/').pop();
+        return (
+          <li>
+            <a
+              href={`/obras/${obra.id}/glosario/${tSlug}/`}
+              aria-label={`Ver entrada del glosario: ${t.data.termino}`}
+            >
+              <span class="termino">{t.data.termino}</span>
+              <span class="desc">{t.data.descripcion_corta}</span>
+              <span class="cta" aria-hidden="true">
+                Ver <span class="arrow">→</span>
+              </span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  )}
 </BaseLayout>
 
 <style>
   .breadcrumb {
-    margin-bottom: var(--space-md);
+    margin-bottom: 1.25rem;
+    font-family: var(--sans);
+    font-size: 0.88rem;
     text-align: center;
   }
-  .breadcrumb a { color: var(--color-text-soft); text-decoration: none; }
-  .breadcrumb a:hover { color: var(--color-accent); }
-  .breadcrumb span { margin: 0 0.4rem; }
+  .breadcrumb a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb .sep {
+    margin: 0 0.5rem;
+    color: var(--ink-faint);
+  }
 
   .head {
     text-align: center;
-    margin-bottom: var(--space-md);
+    margin-bottom: 2rem;
   }
-  .meta {
-    font-family: var(--font-sans);
+  .kicker {
+    font-family: var(--sans);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.78rem;
-    color: var(--color-text-soft);
-    margin: 0 0 0.3rem;
+    letter-spacing: 0.18em;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+    margin: 0 0 0.4rem;
   }
   .head h1 {
-    margin: 0;
+    font-family: var(--display);
     font-size: 2.2rem;
+    font-weight: 500;
+    margin: 0 0 0.6rem;
+  }
+  .orn {
+    color: var(--ink-faint);
+    margin-top: 0.6rem;
   }
   .empty {
     text-align: center;
-    margin-top: var(--space-md);
+    margin-top: 2rem;
   }
 
-  /* Grid: 3 columnas en desktop, 2 en tablet, 1 en móvil */
   .terminos-grid {
     list-style: none;
     padding: 0;
     margin: 0;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.85rem;
+    gap: 1rem;
   }
   @media (max-width: 800px) {
     .terminos-grid { grid-template-columns: repeat(2, 1fr); }
@@ -111,59 +121,55 @@ const padNum = (n: number) => String(n).padStart(2, '0');
   @media (max-width: 520px) {
     .terminos-grid { grid-template-columns: 1fr; }
   }
-  .terminos-grid li {
-    list-style: none;
-  }
   .terminos-grid a {
     display: flex;
     flex-direction: column;
     height: 100%;
     padding: 1.1rem 1.2rem;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    background: var(--color-bg);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper);
     text-decoration: none;
-    color: var(--color-text);
+    color: var(--ink);
     transition: background-color 120ms ease, border-color 120ms ease;
   }
   .terminos-grid a:hover {
-    background-color: var(--color-bg-soft);
-    border-color: var(--color-accent);
+    background: var(--bg-soft);
+    border-color: var(--accent);
   }
   .terminos-grid a:hover .termino,
   .terminos-grid a:hover .cta {
-    color: var(--color-accent);
+    color: var(--accent);
   }
   .terminos-grid a:hover .arrow {
     transform: translateX(3px);
   }
   .terminos-grid .termino {
-    font-family: var(--font-serif);
-    font-size: 1.15rem;
+    font-family: var(--display);
+    font-size: 1.2rem;
     font-weight: 600;
-    line-height: 1.3;
-    margin-bottom: 0.35rem;
+    line-height: 1.25;
+    margin-bottom: 0.4rem;
     transition: color 120ms ease;
   }
-  .terminos-grid .cap-sinopsis {
-    font-family: var(--font-serif);
+  .terminos-grid .desc {
+    font-family: var(--serif);
     font-size: 0.95rem;
-    color: var(--color-text-soft);
+    color: var(--ink-soft);
     line-height: 1.45;
-    /* Permitir hasta 4 líneas y luego cortar con elipsis */
+    flex: 1;
+    margin-bottom: 0.7rem;
     display: -webkit-box;
     -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    flex: 1;
-    margin-bottom: 0.6rem;
   }
   .terminos-grid .cta {
     margin-top: auto;
-    font-family: var(--font-sans);
+    font-family: var(--sans);
     font-size: 0.85rem;
     font-weight: 500;
-    color: var(--color-text-soft);
+    color: var(--ink-soft);
     transition: color 120ms ease;
   }
   .terminos-grid .arrow {

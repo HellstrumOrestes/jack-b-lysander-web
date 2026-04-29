@@ -1,34 +1,160 @@
 ---
-// Panel inferior fijo que muestra el término del glosario tras click.
-// Lee data-term, data-desc del enlace clicado y se rellena en cliente.
+// Panel inferior fijo que muestra info del término del glosario.
+// Solo se activa en dispositivos sin hover real (móvil / tablet),
+// donde el tooltip CSS-only que pinta el plugin Rehype no funciona.
+// En desktop el click navega normalmente a la página del término.
+//
+// Lee del enlace clicado:
+//   - href: URL de la página completa del término
+//   - data-tooltip: descripcion_corta (la inyecta plugins/rehype-glosario.mjs)
+//   - textContent: cómo se muestra el término en el cuerpo
 ---
-<div class="glosario-pin" id="glosario-pin" role="dialog" aria-label="Término del glosario" hidden>
+
+<aside
+  class="glosario-pin"
+  id="glosario-pin"
+  role="dialog"
+  aria-label="Término del glosario"
+  aria-modal="false"
+  hidden
+>
   <div class="glosario-pin-inner">
     <div class="glosario-pin-body">
       <p class="glosario-pin-kicker">Glosario</p>
       <p class="glosario-pin-term" data-pin-term></p>
       <p class="glosario-pin-desc" data-pin-desc></p>
+      <a class="glosario-pin-link" data-pin-link href="#">
+        Ver entrada completa <span aria-hidden="true">→</span>
+      </a>
     </div>
-    <button class="glosario-pin-close" type="button"
-            data-pin-close aria-label="Cerrar">✕</button>
+    <button
+      class="glosario-pin-close"
+      type="button"
+      data-pin-close
+      aria-label="Cerrar"
+    >&times;</button>
   </div>
-</div>
+</aside>
 
 <script>
   const pin = document.getElementById('glosario-pin');
   if (pin) {
-    const term = pin.querySelector('[data-pin-term]');
-    const desc = pin.querySelector('[data-pin-desc]');
-    const close = pin.querySelector('[data-pin-close]');
+    const termEl = pin.querySelector('[data-pin-term]');
+    const descEl = pin.querySelector('[data-pin-desc]');
+    const linkEl = pin.querySelector<HTMLAnchorElement>('[data-pin-link]');
+    const closeBtn = pin.querySelector('[data-pin-close]');
 
-    document.querySelectorAll<HTMLButtonElement>('.glosario-link').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (term) term.textContent = btn.dataset.term || '';
-        if (desc) desc.textContent = btn.dataset.desc || '';
-        pin.removeAttribute('hidden');
-      });
+    // Solo interceptar en dispositivos sin hover real.
+    const noHover = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+    if (noHover) {
+      document
+        .querySelectorAll<HTMLAnchorElement>('a.glosario-link')
+        .forEach((a) => {
+          a.addEventListener('click', (e) => {
+            e.preventDefault();
+            const term = a.textContent?.trim() ?? '';
+            const desc = a.getAttribute('data-tooltip') ?? '';
+            const href = a.getAttribute('href') ?? '#';
+            if (termEl) termEl.textContent = term;
+            if (descEl) descEl.textContent = desc;
+            if (linkEl) linkEl.href = href;
+            pin.removeAttribute('hidden');
+          });
+        });
+    }
+
+    closeBtn?.addEventListener('click', () => pin.setAttribute('hidden', ''));
+
+    // Cerrar con tecla Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !pin.hasAttribute('hidden')) {
+        pin.setAttribute('hidden', '');
+      }
     });
-    close?.addEventListener('click', () => pin.setAttribute('hidden', ''));
   }
 </script>
+
+<style>
+  .glosario-pin {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    z-index: 90;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.25);
+    animation: pin-in 180ms ease-out;
+  }
+  .glosario-pin[hidden] { display: none; }
+  @keyframes pin-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .glosario-pin-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.1rem;
+  }
+  .glosario-pin-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .glosario-pin-kicker {
+    font-family: var(--sans);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.7rem;
+    color: var(--ink-faint);
+    margin: 0 0 0.2rem;
+  }
+  .glosario-pin-term {
+    font-family: var(--display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 0.3rem;
+    line-height: 1.25;
+  }
+  .glosario-pin-desc {
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    line-height: 1.45;
+    margin: 0 0 0.55rem;
+  }
+  .glosario-pin-link {
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .glosario-pin-link:hover {
+    color: var(--accent-2);
+    text-decoration: underline;
+  }
+  .glosario-pin-close {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--rule);
+    background: transparent;
+    border-radius: 999px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-size: 1.05rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .glosario-pin-close:hover {
+    color: var(--ink);
+    border-color: var(--ink-soft);
+    background: var(--bg-soft);
+  }
+</style>
