@@ -32,7 +32,7 @@ export async function GET(context: APIContext) {
   lines.push('');
   lines.push('## Sobre el autor');
   lines.push('');
-  lines.push(`- [Sobre el autor](${site}/sobre/): Biografía y contexto del autor.`);
+  lines.push(`- [Sobre mí](${site}/sobre/): Biografía y contexto del autor.`);
   lines.push('');
   lines.push('## Obras');
   lines.push('');

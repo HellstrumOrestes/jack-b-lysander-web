@@ -29,12 +29,12 @@ const personSchema = {
 ---
 
 <BaseLayout
-  title={frontmatter.titulo ?? 'Sobre el autor'}
+  title={frontmatter.titulo ?? 'Sobre mí'}
   description={frontmatter.descripcion ?? 'Sobre Jack B. Lysander.'}
   schema={[personSchema]}
 >
   <article class="prose sobre">
-    <h1>{frontmatter.titulo ?? 'Sobre el autor'}</h1>
+    <h1>{frontmatter.titulo ?? 'Sobre mí'}</h1>
     {Content ? <Content /> : (
       <p class="text-soft">
         (Falta el archivo <code>src/content/sobre.md</code>.)

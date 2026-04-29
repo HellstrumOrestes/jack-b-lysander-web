@@ -1,5 +1,5 @@
 ---
-titulo: "Sobre el autor"
+titulo: "Sobre mí"
 descripcion: "Sobre Jack B. Lysander, autor de ficción serializada en español."
 ---
 
