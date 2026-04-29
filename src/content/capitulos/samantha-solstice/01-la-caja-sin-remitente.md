@@ -10,19 +10,21 @@ borrador: false
 La caja llegó un martes, justo cuando la lluvia empezaba a apretar contra los
 ventanales del depósito. No tenía remitente, ni sello, ni siquiera una de esas
 etiquetas amarillas que el servicio nocturno solía pegar en las esquinas.
-Samantha la dejó sobre la mesa y se quedó mirándola un minuto largo,
-escuchando el goteo del techo y el zumbido de los fluorescentes.
+[Samantha](/obras/samantha-solstice/glosario/samantha/) la dejó sobre la mesa
+y se quedó mirándola un minuto largo, escuchando el goteo del techo y el
+zumbido de los fluorescentes.
 
-Llevaba siete años en la Biblioteca Nocturna y se había aprendido el ritmo de
+Llevaba siete años en la [Biblioteca Nocturna](/obras/samantha-solstice/glosario/biblioteca-nocturna/) y se había aprendido el ritmo de
 las entregas como quien se aprende el latido propio. Había cajas que pesaban
 demasiado, cajas que olían a humo, cajas que llegaban frías como si hubieran
 viajado por el fondo de un río. Esta no pesaba nada. Esta no olía a nada. Y
 aun así, cuando posó la palma encima de la tapa, notó un calor pequeño, justo
 del tamaño del corazón.
 
-Abrió la caja con el cúter. Dentro había un solo libro encuadernado en tela
-azul, sin título en la portada, sin autor en el lomo. Lo sacó con cuidado, y
-en la primera página, escrita a mano y con tinta negra, leyó su nombre.
+Abrió la caja con el cúter. Dentro había un solo [libro encuadernado en tela
+azul](/obras/samantha-solstice/glosario/libro-azul/), sin título en la
+portada, sin autor en el lomo. Lo sacó con cuidado, y en la primera página,
+escrita a mano y con tinta negra, leyó su nombre.
 
 Samantha Solstice.
 

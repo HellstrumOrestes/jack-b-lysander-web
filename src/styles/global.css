@@ -161,6 +161,73 @@ nav,
   margin: var(--space-lg) 0;
 }
 
+/* ---- Enlaces de glosario con tooltip ---- */
+/* Inyectados por plugins/rehype-glosario.mjs en cada enlace que apunta a
+   /obras/<obra>/glosario/<termino>/. El atributo data-tooltip contiene
+   la descripcion_corta del frontmatter. En desktop aparece como tooltip
+   al hover; en móvil/tablet (sin :hover real) el tap navega a la página
+   completa del término. */
+a.glosario-link {
+  position: relative;
+  text-decoration: none;
+  border-bottom: 1px dashed var(--color-accent);
+  color: var(--color-text);
+}
+a.glosario-link:hover,
+a.glosario-link:focus-visible {
+  color: var(--color-accent);
+  border-bottom-style: solid;
+}
+a.glosario-link::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 280px;
+  padding: 0.55rem 0.75rem;
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.4;
+  border-radius: 4px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  white-space: normal;
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease, visibility 120ms ease;
+  z-index: 10;
+}
+a.glosario-link::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 2px);
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--color-text);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease, visibility 120ms ease;
+  z-index: 10;
+}
+@media (hover: hover) and (pointer: fine) {
+  a.glosario-link:hover::after,
+  a.glosario-link:hover::before,
+  a.glosario-link:focus-visible::after,
+  a.glosario-link:focus-visible::before {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 600px) {
   body { font-size: 18px; }

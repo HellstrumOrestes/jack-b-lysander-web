@@ -148,6 +148,96 @@ Para parar el servidor: `Ctrl + C` en la terminal.
 
 ---
 
+## Glosario por obra
+
+Cada obra puede tener su propio glosario de términos (personajes,
+lugares, objetos, conceptos). Aparece publicado en
+`/obras/<slug-obra>/glosario/` y, dentro de un capítulo, los enlaces
+que apunten a un término del glosario salen con **tooltip al hover**
+en desktop y **navegan a la página completa** del término al hacer
+clic (también en móvil).
+
+### Cómo añadir un término
+
+1. Crea un archivo en
+   `src/content/glosario/<slug-obra>/<slug-termino>.md`. Ejemplo:
+   `src/content/glosario/samantha-solstice/samantha.md`.
+
+2. El frontmatter es **obligatorio** y se valida en build:
+
+   ```markdown
+   ---
+   termino: "Samantha Solstice"             # cómo se muestra el nombre
+   obra: "samantha-solstice"                # debe coincidir con la obra
+   descripcion_corta: "Bibliotecaria nocturna y protagonista de la novela."
+   ---
+
+   Aquí va la descripción larga del término en Markdown.
+   Aparecerá en la página individual del término. Puedes
+   escribir varios párrafos.
+   ```
+
+3. **`descripcion_corta`** es lo que se muestra como tooltip al hover
+   en los capítulos. Tiene un máximo de **180 caracteres** (suficiente
+   para 2-3 líneas en un tooltip). Si te pasas, el build da error con
+   un mensaje claro.
+
+4. El cuerpo del archivo (debajo del frontmatter) es la descripción
+   larga que aparece en `/obras/<slug-obra>/glosario/<slug-termino>/`.
+
+### Cómo enlazar un término desde un capítulo
+
+En un `.md` de capítulo, escribes un enlace **Markdown estándar** que
+apunta a la URL del término:
+
+```markdown
+[Samantha](/obras/samantha-solstice/glosario/samantha/)
+```
+
+Eso es todo. El plugin Rehype detecta automáticamente que ese enlace
+apunta al glosario, lee la `descripcion_corta` del archivo del término
+y la inyecta como tooltip. Tú no tienes que repetir la descripción.
+
+Si quieres mostrar el término con otra forma o capitalización, cambia
+el texto entre corchetes:
+
+```markdown
+[bibliotecaria del turno de noche](/obras/samantha-solstice/glosario/samantha/)
+```
+
+El tooltip seguirá mostrando lo declarado en `descripcion_corta`.
+
+### Reglas y consejos
+
+- **No autoenlaces todas las apariciones.** Pon el enlace solo cuando
+  añada valor. Cansa que cada vez que aparece "Samantha" en el capítulo
+  10 salga el tooltip de "protagonista".
+- **El glosario es por obra.** Un término "Samantha" en
+  `samantha-solstice` puede coexistir con otro en otra obra sin
+  colisionar; cada uno vive en su carpeta y tiene su URL.
+- **El tooltip funciona solo en desktop.** En móvil/tablet no hay
+  hover real; ahí el tap navega directamente a la página completa del
+  término. Diseñado así a propósito.
+- **Si pones un enlace a una URL `/glosario/...` que no existe**, el
+  enlace se quedará como un `<a>` normal (sin tooltip ni clase
+  especial). No rompe nada, pero al hacer clic dará 404.
+
+### Estructura final
+
+```
+src/content/glosario/
+└── samantha-solstice/
+    ├── samantha.md
+    ├── biblioteca-nocturna.md
+    └── libro-azul.md
+```
+
+Cada obra tiene su propia carpeta dentro de `glosario/`. Si una obra
+no tiene términos, simplemente no creas la carpeta y no aparece la
+sección "Glosario" en su página.
+
+---
+
 ## Trabajar capítulos en borrador (rama `borradores`)
 
 Como el repositorio es público, cualquiera podría leer un `.md` con

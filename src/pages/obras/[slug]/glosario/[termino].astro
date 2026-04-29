@@ -1,0 +1,118 @@
+---
+// Página individual de un término del glosario.
+// Ruta: /obras/[slug-obra]/glosario/[termino]/
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const obras = await getCollection('obras');
+  const obrasMap = new Map(obras.map((o) => [o.id, o]));
+
+  const terminos = await getCollection('glosario');
+
+  const paths = [];
+  for (const t of terminos) {
+    const obra = obrasMap.get(t.data.obra);
+    if (!obra) {
+      throw new Error(
+        `Término del glosario "${t.id}" referencia obra "${t.data.obra}" que no existe en src/content/obras/.`,
+      );
+    }
+    const tSlug = t.id.split('/').pop() as string;
+    paths.push({
+      params: { slug: obra.id, termino: tSlug },
+      props: { termino: t, obra },
+    });
+  }
+  return paths;
+}
+
+const { termino, obra } = Astro.props;
+const { Content } = await render(termino);
+
+// JSON-LD: definición del término dentro de la obra. Usamos DefinedTerm
+// para que motores y LLMs entiendan que es una entrada de glosario.
+const terminoSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'DefinedTerm',
+  name: termino.data.termino,
+  description: termino.data.descripcion_corta,
+  inDefinedTermSet: {
+    '@type': 'DefinedTermSet',
+    name: `Glosario de ${obra.data.titulo}`,
+    url: new URL(`/obras/${obra.id}/glosario/`, Astro.site).toString(),
+  },
+  inLanguage: 'es-ES',
+};
+---
+
+<BaseLayout
+  title={`${termino.data.termino} · Glosario · ${obra.data.titulo}`}
+  description={termino.data.descripcion_corta}
+  schema={[terminoSchema]}
+>
+  <article>
+    <nav class="breadcrumb" aria-label="Migas de pan">
+      <a href="/obras/">Obras</a>
+      <span aria-hidden="true">›</span>
+      <a href={`/obras/${obra.id}/`}>{obra.data.titulo}</a>
+      <span aria-hidden="true">›</span>
+      <a href={`/obras/${obra.id}/glosario/`}>Glosario</a>
+    </nav>
+
+    <header class="head">
+      <p class="meta">Glosario · {obra.data.titulo}</p>
+      <h1>{termino.data.termino}</h1>
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <hr />
+
+    <nav class="back" aria-label="Volver">
+      <a href={`/obras/${obra.id}/glosario/`}>← Ver glosario completo</a>
+    </nav>
+  </article>
+</BaseLayout>
+
+<style>
+  .breadcrumb {
+    margin-bottom: var(--space-md);
+    text-align: center;
+  }
+  .breadcrumb a { color: var(--color-text-soft); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--color-accent); }
+  .breadcrumb span { margin: 0 0.4rem; }
+
+  .head {
+    text-align: center;
+    margin-bottom: var(--space-lg);
+  }
+  .meta {
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    color: var(--color-text-soft);
+    margin: 0 0 0.3rem;
+  }
+  .head h1 {
+    font-size: 2.2rem;
+    margin: 0;
+  }
+
+  .back {
+    text-align: center;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+  }
+  .back a {
+    color: var(--color-text-soft);
+    text-decoration: none;
+  }
+  .back a:hover {
+    color: var(--color-accent);
+  }
+</style>

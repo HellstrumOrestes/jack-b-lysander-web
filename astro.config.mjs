@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import rehypeGlosario from './plugins/rehype-glosario.mjs';
 
 // Configuración de Astro para jackblysander.com
 // El sitio se sirve desde dominio personalizado (CNAME en public/),
@@ -9,6 +10,9 @@ export default defineConfig({
   trailingSlash: 'always',
   build: {
     format: 'directory',
+  },
+  markdown: {
+    rehypePlugins: [rehypeGlosario],
   },
   integrations: [
     sitemap({

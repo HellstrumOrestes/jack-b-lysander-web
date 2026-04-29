@@ -36,4 +36,18 @@ const capitulos = defineCollection({
   }),
 });
 
-export const collections = { obras, capitulos };
+// Glosario por obra. Estructura en disco:
+//   src/content/glosario/<obra-slug>/<termino-slug>.md
+// El frontmatter declara el "termino" (cómo se muestra) y la
+// "descripcion_corta" (lo que aparece en el tooltip al hover).
+// El cuerpo del .md es la descripción larga de la página individual.
+const glosario = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/glosario' }),
+  schema: z.object({
+    termino: z.string(),
+    obra: z.string(),
+    descripcion_corta: z.string().max(180, 'descripcion_corta no puede exceder 180 caracteres (cabe en un tooltip)'),
+  }),
+});
+
+export const collections = { obras, capitulos, glosario };

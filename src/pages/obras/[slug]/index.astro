@@ -20,6 +20,12 @@ const capitulos = (await getCollection('capitulos', (c) =>
   c.data.obra === obra.id && c.data.borrador !== true,
 )).sort((a, b) => a.data.numero - b.data.numero);
 
+// Términos del glosario de esta obra (orden alfabético)
+const terminosGlosario = (await getCollection('glosario', (t) => t.data.obra === obra.id))
+  .sort((a, b) =>
+    a.data.termino.localeCompare(b.data.termino, 'es', { sensitivity: 'base' }),
+  );
+
 const fechaFmt = (d: Date) =>
   d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -112,6 +118,33 @@ const seriesSchema = {
         </ol>
       )}
     </section>
+
+    {terminosGlosario.length > 0 && (
+      <section class="glosario-section">
+        <h2>Glosario</h2>
+        <p class="glosario-intro text-soft">
+          Personajes, lugares y objetos de esta obra.
+        </p>
+        <ul class="glosario-mini">
+          {terminosGlosario.slice(0, 5).map((t) => {
+            const tSlug = t.id.split('/').pop();
+            return (
+              <li>
+                <a href={`/obras/${obra.id}/glosario/${tSlug}/`}>
+                  {t.data.termino}
+                </a>
+                <span class="text-soft"> — {t.data.descripcion_corta}</span>
+              </li>
+            );
+          })}
+        </ul>
+        <p class="glosario-link">
+          <a href={`/obras/${obra.id}/glosario/`}>
+            Ver glosario completo <span aria-hidden="true">→</span>
+          </a>
+        </p>
+      </section>
+    )}
   </article>
 
   <NewsletterForm compact />
@@ -236,5 +269,51 @@ const seriesSchema = {
       justify-self: end;
       margin-top: 0.4rem;
     }
+  }
+
+  /* Sección glosario en la página de obra */
+  .glosario-section {
+    max-width: var(--measure);
+    margin: var(--space-lg) auto 0;
+  }
+  .glosario-section h2 {
+    font-size: 1.4rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+  .glosario-intro {
+    margin: 0 0 0.8rem;
+    font-size: 0.95rem;
+  }
+  .glosario-mini {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+  }
+  .glosario-mini li {
+    padding: 0.35rem 0;
+    line-height: 1.5;
+  }
+  .glosario-mini li a {
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  .glosario-mini li a:hover {
+    color: var(--color-accent);
+  }
+  .glosario-link {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+  }
+  .glosario-link a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+  .glosario-link a:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
   }
 </style>
