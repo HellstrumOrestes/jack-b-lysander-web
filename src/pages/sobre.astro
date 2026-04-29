@@ -1,53 +1,38 @@
 ---
-// Página "Sobre el autor". Carga el contenido desde src/content/sobre.md
-// (un único archivo Markdown). Si no existe, muestra placeholder.
 import BaseLayout from '../layouts/BaseLayout.astro';
-import NewsletterForm from '../components/NewsletterForm.astro';
-
-// Importación directa del Markdown como módulo Astro
-let Content: any = null;
-let frontmatter: any = {};
-try {
-  const mod: any = await import('../sobre.md');
-  Content = mod.Content;
-  frontmatter = mod.frontmatter ?? {};
-} catch {
-  // si no existe el archivo, dejamos los defaults
-}
-
-// JSON-LD Person: identifica al autor para que motores y LLMs
-// asocien correctamente las obras y la página.
-const personSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: 'Jack B. Lysander',
-  alternateName: 'Jack B. Lysander',
-  description: frontmatter.descripcion ?? 'Autor de ficción serializada en español.',
-  url: new URL('/sobre/', Astro.site).toString(),
-  inLanguage: 'es-ES',
-};
+import NewsletterCard from '../components/NewsletterCard.astro';
+import Fleuron from '../components/Fleuron.astro';
 ---
-
-<BaseLayout
-  title={frontmatter.titulo ?? 'Sobre mí'}
-  description={frontmatter.descripcion ?? 'Sobre Jack B. Lysander.'}
-  schema={[personSchema]}
->
-  <article class="prose sobre">
-    <h1>{frontmatter.titulo ?? 'Sobre mí'}</h1>
-    {Content ? <Content /> : (
-      <p class="text-soft">
-        (Falta el archivo <code>src/content/sobre.md</code>.)
-      </p>
-    )}
-  </article>
-
-  <NewsletterForm compact />
+<BaseLayout active="sobre" title="Sobre — Jack B. Lysander">
+  <main class="view view-sobre">
+    <article class="sobre">
+      <p class="capitulo-header-kicker">Sobre</p>
+      <h1 class="sobre-title">El autor</h1>
+      <div class="capitulo-header-orn"><Fleuron size={14} opacity={0.5} /></div>
+      <div class="prose">
+        <p>
+          Jack B. Lysander es el pseudónimo bajo el que publico ficción en
+          español. Aquí no hay biografía oficial todavía, ni foto, ni
+          bibliografía cerrada: solo historias en marcha y la voluntad de
+          contarlas con calma.
+        </p>
+        <p>
+          Escribo lento, publico despacio. Cada capítulo se cuece durante
+          semanas, a veces meses. Lo que aparece aquí ya pasó por varias
+          relecturas; lo que no aparece todavía probablemente esté siendo
+          reescrito por tercera vez.
+        </p>
+        <p>
+          Si quieres saber cuándo publico un capítulo nuevo, lo más sencillo
+          es suscribirte a la newsletter. No mando nada más que avisos de
+          capítulos. Sin spam, sin notas promocionales, sin tracking.
+        </p>
+        <p>
+          Para cualquier cosa, podés escribirme a
+          <a href="mailto:hola@jacklysander.com">hola@jacklysander.com</a>.
+        </p>
+      </div>
+    </article>
+    <NewsletterCard />
+  </main>
 </BaseLayout>
-
-<style>
-  .sobre h1 {
-    text-align: center;
-    margin-bottom: var(--space-md);
-  }
-</style>

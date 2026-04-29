@@ -1,0 +1,41 @@
+---
+// Renderiza un párrafo de prosa, sustituyendo {término:slug} por enlaces
+// de glosario con tooltip + soporte para abrir el panel anclado.
+import { parseGloss } from '../lib/utils';
+import { getEntry } from 'astro:content';
+
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+const parts = parseGloss(text);
+
+const enriched = await Promise.all(
+  parts.map(async (p) => {
+    if (p.kind !== 'gloss') return p;
+    try {
+      const entry = await getEntry('glosario', p.slug);
+      return { ...p, entry: entry?.data };
+    } catch {
+      return { ...p, entry: undefined };
+    }
+  })
+);
+---
+<p>
+  {enriched.map((p) => {
+    if (p.kind === 'text') return <>{p.value}</>;
+    if (!('entry' in p) || !p.entry) return <span>{p.text}</span>;
+    return (
+      <span class="glosario-wrap">
+        <button type="button" class="glosario-link"
+                data-term={p.entry.termino}
+                data-desc={p.entry.descripcion_corta}>{p.text}</button>
+        <span class="glosario-tooltip" role="tooltip">
+          <span class="glosario-tooltip-term">{p.entry.termino}</span>
+          <span class="glosario-tooltip-desc">{p.entry.descripcion_corta}</span>
+        </span>
+      </span>
+    );
+  })}
+</p>

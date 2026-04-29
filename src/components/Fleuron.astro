@@ -1,0 +1,20 @@
+---
+interface Props {
+  size?: number;
+  opacity?: number;
+}
+const { size = 24, opacity = 0.5 } = Astro.props;
+const w = size * 3.5;
+---
+<svg class="fleuron" width={w} height={size} viewBox="0 0 84 24"
+     aria-hidden="true" style={`opacity:${opacity}`}>
+  <g fill="currentColor">
+    <path d="M14 12 L20 6 L26 12 L20 18 Z" />
+    <path d="M42 12 L48 6 L54 12 L48 18 Z" />
+    <path d="M70 12 L76 6 L82 12 L76 18 Z" />
+    <line x1="0"  y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="0.5" />
+    <line x1="26" y1="12" x2="42" y2="12" stroke="currentColor" stroke-width="0.5" />
+    <line x1="54" y1="12" x2="70" y2="12" stroke="currentColor" stroke-width="0.5" />
+    <line x1="82" y1="12" x2="84" y2="12" stroke="currentColor" stroke-width="0.5" />
+  </g>
+</svg>

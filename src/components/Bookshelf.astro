@@ -1,0 +1,94 @@
+---
+// Estantería de obras: lomos verticales sobre balda de madera.
+// Recibe `obras` (collection entries de `obras`) ya ordenadas.
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  obras: CollectionEntry<'obras'>[];
+}
+const { obras } = Astro.props;
+
+const widths = [56, 50, 62, 54, 48, 58, 52];
+---
+<div class="bookshelf" data-bookshelf>
+  <div class="shelf-card" aria-live="polite" data-shelf-card>
+    {obras.map((o, i) => (
+      <div class="shelf-card-panel" data-idx={i} hidden={i !== 0}>
+        <p class="shelf-card-meta">
+          <span>{o.data.genero}</span>
+          <span class="dot">·</span>
+          <span class={`estado estado-${o.data.estado.toLowerCase().replace(/\s/g,'-')}`}>{o.data.estado}</span>
+        </p>
+        <h3 class="shelf-card-title">{o.data.titulo}</h3>
+        <p class="shelf-card-syn">{o.data.sinopsis_corta}</p>
+        <a class="shelf-card-cta" href={`/obras/${o.slug}/`}>
+          Abrir obra <span class="arrow">→</span>
+        </a>
+      </div>
+    ))}
+  </div>
+
+  <div class="shelf">
+    <div class="shelf-books">
+      {obras.map((o, i) => {
+        const altoPct = Math.round((o.data.lomo.alto ?? 0.95) * 100);
+        const w = widths[i % widths.length];
+        return (
+          <a
+            class={`spine ${i === 0 ? 'active' : ''}`}
+            href={`/obras/${o.slug}/`}
+            data-idx={i}
+            style={`width:${w}px;height:${altoPct}%;--spine-bg:${o.data.lomo.color};--spine-accent:${o.data.lomo.accent};`}
+            aria-label={o.data.titulo}
+          >
+            <span class="spine-title">{o.data.titulo}</span>
+            <span class="spine-author">JBL</span>
+            <span class="spine-bands" aria-hidden="true"><span /><span /></span>
+          </a>
+        );
+      })}
+      <span class="spine-gap" aria-hidden="true" />
+    </div>
+    <div class="shelf-board" aria-hidden="true" />
+    <div class="shelf-shadow" aria-hidden="true" />
+  </div>
+
+  <div class="shelf-dots" role="tablist">
+    {obras.map((o, i) => (
+      <button type="button" role="tab"
+              class={`shelf-dot ${i === 0 ? 'active' : ''}`}
+              data-idx={i}
+              aria-selected={i === 0}
+              aria-label={`Mostrar ${o.data.titulo}`} />
+    ))}
+  </div>
+</div>
+
+<script>
+  // Activar lomo en hover/focus/click sobre dot, mostrar panel correspondiente.
+  document.querySelectorAll('[data-bookshelf]').forEach((root) => {
+    const spines = root.querySelectorAll('.spine');
+    const dots   = root.querySelectorAll('.shelf-dot');
+    const panels = root.querySelectorAll('.shelf-card-panel');
+
+    function setActive(idx: number) {
+      spines.forEach((s, i) => s.classList.toggle('active', i === idx));
+      dots.forEach((d, i) => {
+        d.classList.toggle('active', i === idx);
+        d.setAttribute('aria-selected', String(i === idx));
+      });
+      panels.forEach((p, i) => {
+        if (i === idx) p.removeAttribute('hidden');
+        else p.setAttribute('hidden', '');
+      });
+    }
+
+    spines.forEach((s, i) => {
+      s.addEventListener('mouseenter', () => setActive(i));
+      s.addEventListener('focus', () => setActive(i));
+    });
+    dots.forEach((d, i) => {
+      d.addEventListener('click', () => setActive(i));
+    });
+  });
+</script>

@@ -1,0 +1,49 @@
+---
+// Tarjeta-formulario para suscripción a newsletter.
+interface Props {
+  compact?: boolean;
+  /** Endpoint del formulario (Buttondown, ConvertKit, Mailchimp...). Si está vacío, simula envío. */
+  action?: string;
+}
+const { compact = false, action = '' } = Astro.props;
+---
+<div class={`newsletter-card ${compact ? 'is-compact' : ''}`}>
+  <div class="newsletter-card-body">
+    <p class="newsletter-card-kicker">— Newsletter —</p>
+    <h3 class="newsletter-card-title">
+      {compact ? 'Recibe el próximo capítulo' : 'El próximo capítulo, en tu correo'}
+    </h3>
+    {!compact && (
+      <p class="newsletter-card-desc">
+        Aviso por email cuando publico un capítulo nuevo. Sin spam, sin
+        promociones, sin tracking. Solo capítulos.
+      </p>
+    )}
+  </div>
+  <form class="newsletter-card-form" data-newsletter-form
+        method="post" action={action || '#'}>
+    <input type="email" name="email" placeholder="tu@email.com" required
+           aria-label="Tu correo electrónico" />
+    <button type="submit">Suscribirme</button>
+    <p class="newsletter-sent" data-newsletter-sent hidden>
+      Te he añadido a la lista. Revisa tu correo para confirmar.
+    </p>
+  </form>
+</div>
+
+<script define:vars={{ action }}>
+  document.querySelectorAll('[data-newsletter-form]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      // Si no hay action real, solo simula el envío para el demo.
+      if (!action) {
+        e.preventDefault();
+        const sent = form.querySelector('[data-newsletter-sent]');
+        const inp  = form.querySelector('input[type=email]');
+        const btn  = form.querySelector('button[type=submit]');
+        if (sent) sent.removeAttribute('hidden');
+        if (inp)  inp.setAttribute('hidden', '');
+        if (btn)  btn.setAttribute('hidden', '');
+      }
+    });
+  });
+</script>

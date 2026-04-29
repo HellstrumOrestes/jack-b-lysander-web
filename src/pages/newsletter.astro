@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsletterCard from '../components/NewsletterCard.astro';
+import Fleuron from '../components/Fleuron.astro';
+---
+<BaseLayout active="newsletter" title="Newsletter — Jack B. Lysander">
+  <main class="view view-newsletter">
+    <header class="capitulo-header">
+      <p class="capitulo-header-kicker">Newsletter</p>
+      <h1 class="capitulo-header-title">Capítulos en tu correo</h1>
+      <p class="capitulo-header-meta">
+        Sin spam <span class="dot">·</span>
+        Sin promociones <span class="dot">·</span>
+        Solo capítulos
+      </p>
+      <div class="capitulo-header-orn"><Fleuron size={14} opacity={0.5} /></div>
+    </header>
+    <NewsletterCard />
+    <p class="text-soft newsletter-foot">
+      Gestionado con Buttondown. Puedes darte de baja en cualquier momento
+      desde el pie de cada email.
+    </p>
+  </main>
+</BaseLayout>

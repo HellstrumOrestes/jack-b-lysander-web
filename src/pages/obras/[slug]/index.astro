@@ -1,117 +1,83 @@
 ---
-// Página de una obra individual: sinopsis larga + índice de capítulos.
-import { getCollection, render } from 'astro:content';
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import NewsletterForm from '../../../components/NewsletterForm.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Fleuron from '../../components/Fleuron.astro';
+import { getCollection } from 'astro:content';
+import { toRoman, estadoSlug } from '../../lib/utils';
 
 export async function getStaticPaths() {
   const obras = await getCollection('obras');
-  return obras.map((obra) => ({
-    params: { slug: obra.id },
-    props: { obra },
-  }));
+  return obras.map((o) => ({ params: { slug: o.slug }, props: { obra: o } }));
 }
 
 const { obra } = Astro.props;
-const { Content } = await render(obra);
-
-// Cargar capítulos publicados de esta obra
-const capitulos = (await getCollection('capitulos', (c) =>
-  c.data.obra === obra.id && c.data.borrador !== true,
-)).sort((a, b) => a.data.numero - b.data.numero);
-
-// Términos del glosario de esta obra (orden alfabético)
-const terminosGlosario = (await getCollection('glosario', (t) => t.data.obra === obra.id))
-  .sort((a, b) =>
-    a.data.termino.localeCompare(b.data.termino, 'es', { sensitivity: 'base' }),
-  );
-
-const fechaFmt = (d: Date) =>
-  d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
-
-const padNum = (n: number) => String(n).padStart(2, '0');
-
-// JSON-LD CreativeWorkSeries: identifica la obra como una serie literaria
-// con autor, idioma, género y partes (capítulos publicados).
-const obraUrl = new URL(`/obras/${obra.id}/`, Astro.site).toString();
-const seriesSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'CreativeWorkSeries',
-  name: obra.data.titulo,
-  url: obraUrl,
-  inLanguage: 'es-ES',
-  description: obra.data.sinopsis_corta,
-  genre: obra.data.genero,
-  datePublished: obra.data.fecha_inicio.toISOString().split('T')[0],
-  author: {
-    '@type': 'Person',
-    name: 'Jack B. Lysander',
-    url: new URL('/sobre/', Astro.site).toString(),
-  },
-  hasPart: capitulos.map((c) => {
-    const capSlug = c.id.split('/').pop();
-    return {
-      '@type': 'Chapter',
-      name: c.data.titulo,
-      url: new URL(`/obras/${obra.id}/${capSlug}/`, Astro.site).toString(),
-      position: c.data.numero,
-      datePublished: c.data.fecha.toISOString().split('T')[0],
-    };
-  }),
-};
+const allCaps = await getCollection('capitulos', (c) => c.data.obra === obra.slug);
+const capitulos = allCaps.sort((a, b) => a.data.numero - b.data.numero);
 ---
+<BaseLayout active="home" title={`${obra.data.titulo} — Jack B. Lysander`}
+            description={obra.data.sinopsis_corta}>
+  <main class="view view-obra">
+    <nav class="breadcrumb">
+      <a href="/">← Obras</a>
+    </nav>
 
-<BaseLayout
-  title={obra.data.titulo}
-  description={obra.data.sinopsis_corta}
-  ogImage={obra.data.imagen_portada}
-  schema={[seriesSchema]}
-  wide
->
-  <article class="obra">
-    {obra.data.imagen_portada && (
-      <img
-        class="cover"
-        src={obra.data.imagen_portada}
-        alt={`Portada de ${obra.data.titulo}`}
-      />
-    )}
     <header class="obra-header">
-      <p class="meta">
-        {obra.data.genero ? `${obra.data.genero} · ` : ''}{obra.data.estado}
-      </p>
-      <h1>{obra.data.titulo}</h1>
+      <div class="obra-cover" style={`--cover-bg:${obra.data.lomo.color};--cover-accent:${obra.data.lomo.accent};`}>
+        <div class="obra-cover-inner">
+          <p class="obra-cover-author">Jack B. Lysander</p>
+          <hr class="obra-cover-rule" />
+          <p class="obra-cover-title">{obra.data.titulo}</p>
+          <div class="obra-cover-fleuron"><Fleuron size={12} opacity={0.7} /></div>
+        </div>
+      </div>
+
+      <div class="obra-meta">
+        <p class="obra-kicker">
+          <span>{obra.data.genero}</span>
+          <span class="dot">·</span>
+          <span class={`estado estado-${estadoSlug(obra.data.estado)}`}>{obra.data.estado}</span>
+        </p>
+        <h1 class="obra-title">{obra.data.titulo}</h1>
+        {(obra.data.sinopsis_larga ?? [obra.data.sinopsis_corta]).map((p) => (
+          <p class="obra-syn">{p}</p>
+        ))}
+        <dl class="obra-stats">
+          <div><dt>Inicio</dt><dd>{obra.data.fecha_inicio ?? '—'}</dd></div>
+          <div><dt>Capítulos</dt><dd>{obra.data.capitulos_publicados}</dd></div>
+          <div><dt>Estado</dt><dd>{obra.data.estado}</dd></div>
+        </dl>
+      </div>
     </header>
 
-    <div class="prose sinopsis">
-      <Content />
-    </div>
+    <section class="capitulos-section">
+      <header class="section-head section-head-left">
+        <p class="section-kicker">Índice</p>
+        <h2 class="section-title">Capítulos</h2>
+      </header>
 
-    <section class="capitulos">
-      <h2>Capítulos</h2>
       {capitulos.length === 0 ? (
         <p class="text-soft">Aún no hay capítulos publicados.</p>
       ) : (
-        <ol class="capitulos-grid">
-          {capitulos.map((cap) => {
-            const slugCap = cap.id.split('/').pop();
+        <ol class="capitulos-list">
+          {capitulos.map((c) => {
+            const slugFile = c.slug.split('/').pop();
+            const href = `/obras/${obra.slug}/${slugFile}/`;
             return (
-              <li>
-                <a
-                  href={`/obras/${obra.id}/${slugCap}/`}
-                  aria-label={`Leer capítulo ${cap.data.numero}: ${cap.data.titulo}`}
-                >
-                  <span class="num">Capítulo {padNum(cap.data.numero)}</span>
-                  <span class="titulo">{cap.data.titulo}</span>
-                  {cap.data.sinopsis && (
-                    <span class="cap-sinopsis">{cap.data.sinopsis}</span>
-                  )}
-                  <span class="footer">
-                    <span class="fecha">{fechaFmt(cap.data.fecha)}</span>
-                    <span class="cta" aria-hidden="true">
-                      Leer <span class="arrow">→</span>
+              <li class={`capitulo-item ${c.data.proximo ? 'is-next' : ''}`}>
+                <a class={`capitulo-link ${c.data.proximo ? 'is-disabled' : ''}`}
+                   href={c.data.proximo ? '#' : href}
+                   aria-disabled={c.data.proximo ? 'true' : 'false'}>
+                  <span class="capitulo-num">
+                    <span class="capitulo-num-pre">Capítulo</span>
+                    <span class="capitulo-num-roman">{toRoman(c.data.numero)}</span>
+                  </span>
+                  <span class="capitulo-body">
+                    <span class="capitulo-titulo">{c.data.titulo}</span>
+                    <span class="capitulo-syn">{c.data.sinopsis}</span>
+                    <span class="capitulo-meta">
+                      {c.data.proximo ? 'Próximamente' : `${c.data.fecha} · ${c.data.minutos} min de lectura`}
                     </span>
                   </span>
+                  {!c.data.proximo && <span class="capitulo-arrow" aria-hidden="true">→</span>}
                 </a>
               </li>
             );
@@ -119,225 +85,5 @@ const seriesSchema = {
         </ol>
       )}
     </section>
-
-    {terminosGlosario.length > 0 && (
-      <section class="glosario-section">
-        <h2>Glosario</h2>
-        <a
-          class="glosario-cta"
-          href={`/obras/${obra.id}/glosario/`}
-          aria-label={`Ver glosario completo de ${obra.data.titulo}`}
-        >
-          <span class="info">
-            {terminosGlosario.length} {terminosGlosario.length === 1 ? 'entrada' : 'entradas'} sobre personajes, lugares y términos clave de esta obra.
-          </span>
-          <span class="cta" aria-hidden="true">
-            Ver glosario <span class="arrow">→</span>
-          </span>
-        </a>
-      </section>
-    )}
-  </article>
-
-  <NewsletterForm compact />
+  </main>
 </BaseLayout>
-
-<style>
-  .cover {
-    margin: 0 auto var(--space-md);
-    max-height: 360px;
-    object-fit: cover;
-    border-radius: 4px;
-  }
-  .obra-header {
-    text-align: center;
-    margin-bottom: var(--space-md);
-  }
-  .obra-header h1 {
-    margin: 0.2rem 0 0;
-    font-size: 2.4rem;
-  }
-  .meta {
-    font-family: var(--font-sans);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 0.8rem;
-    color: var(--color-text-soft);
-    margin: 0;
-  }
-  .sinopsis {
-    max-width: var(--measure);
-    margin: 0 auto var(--space-lg);
-  }
-  .capitulos {
-    /* Sin max-width: usa el ancho amplio (wide) para que la grid respire */
-  }
-  .capitulos h2 {
-    font-size: 1.4rem;
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 0.4rem;
-    margin-bottom: 1rem;
-  }
-  /* Grid de capítulos: 3 cols desktop, 2 tablet, 1 móvil */
-  .capitulos-grid {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.85rem;
-  }
-  @media (max-width: 800px) {
-    .capitulos-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 520px) {
-    .capitulos-grid { grid-template-columns: 1fr; }
-  }
-  .capitulos-grid li {
-    list-style: none;
-  }
-  .capitulos-grid a {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: 1.1rem 1.2rem;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    background: var(--color-bg);
-    text-decoration: none;
-    color: var(--color-text);
-    transition: background-color 120ms ease, border-color 120ms ease;
-  }
-  .capitulos-grid a:hover {
-    background-color: var(--color-bg-soft);
-    border-color: var(--color-accent);
-  }
-  /* (Hover de num/cta/arrow definidos en sus reglas individuales más abajo.) */
-  /* "Capítulo 01" es el título grande prominente */
-  .capitulos-grid .num {
-    font-family: var(--font-serif);
-    font-size: 1.45rem;
-    font-weight: 600;
-    line-height: 1.2;
-    color: var(--color-text);
-    margin-bottom: 0.15rem;
-    transition: color 120ms ease;
-  }
-  .capitulos-grid a:hover .num {
-    color: var(--color-accent);
-  }
-  /* Subtítulo del capítulo (más pequeño) */
-  .capitulos-grid .titulo {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.35;
-    color: var(--color-text-soft);
-    margin-bottom: 0.7rem;
-  }
-  .capitulos-grid .cap-sinopsis {
-    font-family: var(--font-serif);
-    font-size: 0.95rem;
-    color: var(--color-text-soft);
-    line-height: 1.45;
-    flex: 1;
-    margin-bottom: 0.9rem;
-    /* Hasta 4 líneas, luego elipsis */
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  /* Footer de la card: fecha izquierda, "Leer →" derecha */
-  .capitulos-grid .footer {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-top: auto;
-    padding-top: 0.4rem;
-    border-top: 1px solid var(--color-border);
-  }
-  .capitulos-grid .fecha {
-    font-family: var(--font-sans);
-    font-size: 0.78rem;
-    color: var(--color-text-soft);
-    letter-spacing: 0.02em;
-  }
-  .capitulos-grid .cta {
-    font-family: var(--font-sans);
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--color-text-soft);
-    transition: color 120ms ease;
-  }
-  .capitulos-grid a:hover .cta {
-    color: var(--color-accent);
-  }
-  .capitulos-grid .arrow {
-    display: inline-block;
-    transition: transform 120ms ease;
-  }
-  .capitulos-grid a:hover .arrow {
-    transform: translateX(3px);
-  }
-
-  /* Sección glosario: bloque sutil que invita a entrar al índice */
-  .glosario-section {
-    max-width: var(--measure);
-    margin: var(--space-lg) auto 0;
-  }
-  .glosario-section h2 {
-    font-size: 1.4rem;
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 0.4rem;
-    margin-bottom: 0.5rem;
-  }
-  /* Card invitación al glosario completo */
-  .glosario-cta {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 1rem;
-    align-items: center;
-    padding: 1.1rem 1.25rem;
-    text-decoration: none;
-    color: var(--color-text);
-    background: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    transition: background-color 120ms ease, border-color 120ms ease;
-  }
-  .glosario-cta:hover {
-    background-color: var(--color-bg-soft);
-    border-color: var(--color-accent);
-  }
-  .glosario-cta:hover .cta {
-    color: var(--color-accent);
-  }
-  .glosario-cta:hover .arrow {
-    transform: translateX(3px);
-  }
-  .glosario-cta .info {
-    font-family: var(--font-serif);
-    color: var(--color-text-soft);
-    line-height: 1.5;
-  }
-  .glosario-cta .cta {
-    font-family: var(--font-sans);
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--color-text-soft);
-    white-space: nowrap;
-    transition: color 120ms ease;
-  }
-  .glosario-cta .arrow {
-    display: inline-block;
-    transition: transform 120ms ease;
-  }
-  @media (max-width: 520px) {
-    .glosario-cta {
-      gap: 0.6rem;
-      padding: 0.95rem 1rem;
-    }
-  }
-</style>

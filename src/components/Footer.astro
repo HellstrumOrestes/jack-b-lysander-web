@@ -1,34 +1,21 @@
 ---
-// Pie de página minimalista
+import Fleuron from './Fleuron.astro';
 const year = new Date().getFullYear();
 ---
-
 <footer class="site-footer">
   <div class="footer-inner">
-    <p>
-      <a href="/sobre/">Sobre mí</a>
+    <Fleuron size={14} opacity={0.35} />
+    <p class="footer-line">
+      <span>Jack B. Lysander</span>
+      <span class="dot">·</span>
+      <span>Ficción serializada en español</span>
     </p>
-    <p class="copy">&copy; {year} Jack B. Lysander</p>
+    <p class="footer-meta">
+      <a href="/rss.xml">RSS</a>
+      <span class="dot">·</span>
+      <a href="/newsletter">Newsletter</a>
+      <span class="dot">·</span>
+      <span>© {year}</span>
+    </p>
   </div>
 </footer>
-
-<style>
-  .site-footer {
-    border-top: 1px solid var(--color-border);
-    margin-top: var(--space-xl);
-    padding: 1.5rem;
-    font-family: var(--font-sans);
-    font-size: 0.85rem;
-    color: var(--color-text-soft);
-  }
-  .footer-inner {
-    max-width: 720px;
-    margin: 0 auto;
-    text-align: center;
-  }
-  .footer-inner p { margin: 0.25rem 0; }
-  .footer-inner a { color: var(--color-text-soft); }
-  .footer-inner a:hover { color: var(--color-accent); }
-  .sep { margin: 0 0.5rem; }
-  .copy { font-size: 0.8rem; }
-</style>

@@ -1,0 +1,34 @@
+---
+// Panel inferior fijo que muestra el término del glosario tras click.
+// Lee data-term, data-desc del enlace clicado y se rellena en cliente.
+---
+<div class="glosario-pin" id="glosario-pin" role="dialog" aria-label="Término del glosario" hidden>
+  <div class="glosario-pin-inner">
+    <div class="glosario-pin-body">
+      <p class="glosario-pin-kicker">Glosario</p>
+      <p class="glosario-pin-term" data-pin-term></p>
+      <p class="glosario-pin-desc" data-pin-desc></p>
+    </div>
+    <button class="glosario-pin-close" type="button"
+            data-pin-close aria-label="Cerrar">✕</button>
+  </div>
+</div>
+
+<script>
+  const pin = document.getElementById('glosario-pin');
+  if (pin) {
+    const term = pin.querySelector('[data-pin-term]');
+    const desc = pin.querySelector('[data-pin-desc]');
+    const close = pin.querySelector('[data-pin-close]');
+
+    document.querySelectorAll<HTMLButtonElement>('.glosario-link').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (term) term.textContent = btn.dataset.term || '';
+        if (desc) desc.textContent = btn.dataset.desc || '';
+        pin.removeAttribute('hidden');
+      });
+    });
+    close?.addEventListener('click', () => pin.setAttribute('hidden', ''));
+  }
+</script>
