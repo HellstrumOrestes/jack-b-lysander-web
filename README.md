@@ -148,6 +148,36 @@ Para parar el servidor: `Ctrl + C` en la terminal.
 
 ---
 
+## Trabajar capítulos en borrador (rama `borradores`)
+
+Como el repositorio es público, cualquiera podría leer un `.md` con
+`borrador: true` aunque no se publique en la web. Para evitarlo, usa
+la rama `borradores`:
+
+1. **Cuando empieces un capítulo a medio**, trabájalo en la rama
+   `borradores`. Desde la interfaz de GitHub.com:
+   - Arriba a la izquierda del repo hay un selector de rama (pone
+     `main`). Haz clic, escribe `borradores` y selecciona la rama.
+   - Crea o edita el `.md` allí. Commit en la rama `borradores`.
+2. **Cuando esté listo para publicar**, lo "mueves" a `main`:
+   - Pestaña **Pull requests** → **New pull request**.
+   - Base: `main` ← Compare: `borradores`. Crear PR.
+   - **Merge pull request** → confirma. En 1-2 min está en la web.
+3. Si quieres que el capítulo NO aparezca aunque ya esté en `main`,
+   pon `borrador: true` en el frontmatter: ese flag impide que se
+   publique en la web ni en el RSS, aunque el archivo esté en `main`.
+
+**Tip**: pulsa la tecla `.` en cualquier vista del repo para abrir
+**github.dev** (un VS Code completo en el navegador). Mucho más
+cómodo para escribir que el editor de archivos por defecto de
+GitHub.com.
+
+Si prefieres trabajar todo en local con `npm run dev` y ver el
+preview antes de publicar, sigue siendo válido: clona el repo y
+trabaja como cualquier proyecto.
+
+---
+
 ## Validación: por qué a veces el build falla
 
 El proyecto usa **Astro Content Collections** con validación estricta.
