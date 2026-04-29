@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Página no encontrada" description="404 - Esta página no existe.">
+  <div class="not-found">
+    <p class="meta">Error 404</p>
+    <h1>Esta página no existe</h1>
+    <p>
+      Quizás te has perdido entre capítulos. Vuelve a las
+      <a href="/obras/">obras</a> o a la <a href="/">portada</a>.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found {
+    text-align: center;
+    padding: var(--space-xl) 0;
+  }
+  .not-found h1 {
+    font-size: 2rem;
+    margin: 0.5rem 0 1rem;
+  }
+  .not-found .meta {
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.8rem;
+    color: var(--color-text-soft);
+    margin: 0;
+  }
+</style>

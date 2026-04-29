@@ -1,0 +1,169 @@
+---
+// Página de una obra individual: sinopsis larga + índice de capítulos.
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import NewsletterForm from '../../../components/NewsletterForm.astro';
+
+export async function getStaticPaths() {
+  const obras = await getCollection('obras');
+  return obras.map((obra) => ({
+    params: { slug: obra.slug },
+    props: { obra },
+  }));
+}
+
+const { obra } = Astro.props;
+const { Content } = await obra.render();
+
+// Cargar capítulos publicados de esta obra
+const capitulos = (await getCollection('capitulos', (c) =>
+  c.data.obra === obra.slug && c.data.borrador !== true,
+)).sort((a, b) => a.data.numero - b.data.numero);
+
+const fechaFmt = (d: Date) =>
+  d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const padNum = (n: number) => String(n).padStart(2, '0');
+---
+
+<BaseLayout
+  title={obra.data.titulo}
+  description={obra.data.sinopsis_corta}
+>
+  <article class="obra">
+    {obra.data.imagen_portada && (
+      <img
+        class="cover"
+        src={obra.data.imagen_portada}
+        alt={`Portada de ${obra.data.titulo}`}
+      />
+    )}
+    <header class="obra-header">
+      <p class="meta">
+        {obra.data.genero ? `${obra.data.genero} · ` : ''}{obra.data.estado}
+      </p>
+      <h1>{obra.data.titulo}</h1>
+    </header>
+
+    <div class="prose sinopsis">
+      <Content />
+    </div>
+
+    <section class="capitulos">
+      <h2>Capítulos</h2>
+      {capitulos.length === 0 ? (
+        <p class="text-soft">Aún no hay capítulos publicados.</p>
+      ) : (
+        <ol class="capitulos-list">
+          {capitulos.map((cap) => {
+            const slugCap = cap.slug.split('/').pop();
+            return (
+              <li>
+                <a href={`/obras/${obra.slug}/${slugCap}/`}>
+                  <span class="num">{padNum(cap.data.numero)}</span>
+                  <span class="titulo">{cap.data.titulo}</span>
+                  <span class="fecha">{fechaFmt(cap.data.fecha)}</span>
+                </a>
+                {cap.data.sinopsis && (
+                  <p class="cap-sinopsis text-soft">{cap.data.sinopsis}</p>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </section>
+  </article>
+
+  <NewsletterForm compact />
+</BaseLayout>
+
+<style>
+  .cover {
+    margin: 0 auto var(--space-md);
+    max-height: 360px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  .obra-header {
+    text-align: center;
+    margin-bottom: var(--space-md);
+  }
+  .obra-header h1 {
+    margin: 0.2rem 0 0;
+    font-size: 2.4rem;
+  }
+  .meta {
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.8rem;
+    color: var(--color-text-soft);
+    margin: 0;
+  }
+  .sinopsis {
+    margin-bottom: var(--space-lg);
+  }
+  .capitulos {
+    max-width: var(--measure);
+    margin: 0 auto;
+  }
+  .capitulos h2 {
+    font-size: 1.4rem;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+  .capitulos-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .capitulos-list li {
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .capitulos-list a {
+    display: grid;
+    grid-template-columns: 2.4em 1fr auto;
+    gap: 0.8rem;
+    align-items: baseline;
+    text-decoration: none;
+    color: var(--color-text);
+  }
+  .capitulos-list a:hover .titulo {
+    color: var(--color-accent);
+  }
+  .capitulos-list .num {
+    font-family: var(--font-sans);
+    font-feature-settings: 'tnum';
+    color: var(--color-text-soft);
+    font-size: 0.9rem;
+  }
+  .capitulos-list .titulo {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+  }
+  .capitulos-list .fecha {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    color: var(--color-text-soft);
+    white-space: nowrap;
+  }
+  .cap-sinopsis {
+    margin: 0.2rem 0 0 calc(2.4em + 0.8rem);
+    font-size: 0.95rem;
+  }
+  @media (max-width: 480px) {
+    .capitulos-list a {
+      grid-template-columns: 2em 1fr;
+    }
+    .capitulos-list .fecha {
+      grid-column: 2;
+      font-size: 0.75rem;
+    }
+    .cap-sinopsis {
+      margin-left: 2.8rem;
+    }
+  }
+</style>

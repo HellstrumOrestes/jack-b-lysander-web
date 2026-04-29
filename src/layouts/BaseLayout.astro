@@ -1,0 +1,54 @@
+---
+// Layout base: HTML, head con SEO mínimo, header, slot, footer.
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Si true, no añade el sufijo " - Jack B. Lysander" al título */
+  rawTitle?: boolean;
+}
+const {
+  title,
+  description = 'Ficción serializada en español por Jack B. Lysander.',
+  rawTitle = false,
+} = Astro.props;
+
+const fullTitle = rawTitle ? title : `${title} — Jack B. Lysander`;
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" href="/logo-transparent.png" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Jack B. Lysander"
+      href="/rss.xml"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="es_ES" />
+  </head>
+  <body>
+    <div class="site-wrapper">
+      <Header />
+      <main>
+        <slot />
+      </main>
+      <Footer />
+    </div>
+  </body>
+</html>

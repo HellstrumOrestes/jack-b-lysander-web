@@ -1,0 +1,40 @@
+---
+// Página "Sobre el autor". Carga el contenido desde src/content/sobre.md
+// (un único archivo Markdown). Si no existe, muestra placeholder.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
+
+// Importación directa del Markdown como módulo Astro
+let Content: any = null;
+let frontmatter: any = {};
+try {
+  const mod: any = await import('../content/sobre.md');
+  Content = mod.Content;
+  frontmatter = mod.frontmatter ?? {};
+} catch {
+  // si no existe el archivo, dejamos los defaults
+}
+---
+
+<BaseLayout
+  title={frontmatter.titulo ?? 'Sobre el autor'}
+  description={frontmatter.descripcion ?? 'Sobre Jack B. Lysander.'}
+>
+  <article class="prose sobre">
+    <h1>{frontmatter.titulo ?? 'Sobre el autor'}</h1>
+    {Content ? <Content /> : (
+      <p class="text-soft">
+        (Falta el archivo <code>src/content/sobre.md</code>.)
+      </p>
+    )}
+  </article>
+
+  <NewsletterForm compact />
+</BaseLayout>
+
+<style>
+  .sobre h1 {
+    text-align: center;
+    margin-bottom: var(--space-md);
+  }
+</style>
