@@ -90,14 +90,20 @@ const seriesSchema = {
             const slugCap = cap.id.split('/').pop();
             return (
               <li>
-                <a href={`/obras/${obra.id}/${slugCap}/`}>
+                <a
+                  href={`/obras/${obra.id}/${slugCap}/`}
+                  aria-label={`Leer capítulo ${cap.data.numero}: ${cap.data.titulo}`}
+                >
                   <span class="num">{padNum(cap.data.numero)}</span>
-                  <span class="titulo">{cap.data.titulo}</span>
+                  <div class="info">
+                    <span class="titulo">{cap.data.titulo}</span>
+                    {cap.data.sinopsis && (
+                      <span class="cap-sinopsis">{cap.data.sinopsis}</span>
+                    )}
+                  </div>
                   <span class="fecha">{fechaFmt(cap.data.fecha)}</span>
+                  <span class="arrow" aria-hidden="true">→</span>
                 </a>
-                {cap.data.sinopsis && (
-                  <p class="cap-sinopsis text-soft">{cap.data.sinopsis}</p>
-                )}
               </li>
             );
           })}
@@ -151,19 +157,27 @@ const seriesSchema = {
     margin: 0;
   }
   .capitulos-list li {
-    padding: 0.7rem 0;
     border-bottom: 1px solid var(--color-border);
   }
   .capitulos-list a {
     display: grid;
-    grid-template-columns: 2.4em 1fr auto;
-    gap: 0.8rem;
-    align-items: baseline;
+    grid-template-columns: 2.4em 1fr auto auto;
+    gap: 0.9rem;
+    align-items: center;
+    padding: 0.85rem 0.5rem;
     text-decoration: none;
     color: var(--color-text);
+    transition: background-color 120ms ease;
   }
-  .capitulos-list a:hover .titulo {
+  .capitulos-list a:hover {
+    background-color: var(--color-bg-soft);
+  }
+  .capitulos-list a:hover .titulo,
+  .capitulos-list a:hover .arrow {
     color: var(--color-accent);
+  }
+  .capitulos-list a:hover .arrow {
+    transform: translateX(3px);
   }
   .capitulos-list .num {
     font-family: var(--font-sans);
@@ -171,9 +185,27 @@ const seriesSchema = {
     color: var(--color-text-soft);
     font-size: 0.9rem;
   }
+  .capitulos-list .info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
   .capitulos-list .titulo {
     font-family: var(--font-serif);
     font-size: 1.15rem;
+    transition: color 120ms ease;
+  }
+  .capitulos-list .cap-sinopsis {
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    color: var(--color-text-soft);
+  }
+  .capitulos-list .arrow {
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    color: var(--color-text-soft);
+    transition: transform 120ms ease, color 120ms ease;
   }
   .capitulos-list .fecha {
     font-family: var(--font-sans);
@@ -181,20 +213,20 @@ const seriesSchema = {
     color: var(--color-text-soft);
     white-space: nowrap;
   }
-  .cap-sinopsis {
-    margin: 0.2rem 0 0 calc(2.4em + 0.8rem);
-    font-size: 0.95rem;
-  }
-  @media (max-width: 480px) {
+  @media (max-width: 520px) {
     .capitulos-list a {
-      grid-template-columns: 2em 1fr;
+      grid-template-columns: 2em 1fr auto;
+      gap: 0.6rem;
+      padding: 0.75rem 0.25rem;
     }
     .capitulos-list .fecha {
-      grid-column: 2;
+      grid-column: 2 / span 2;
       font-size: 0.75rem;
+      margin-top: 0.15rem;
     }
-    .cap-sinopsis {
-      margin-left: 2.8rem;
+    .capitulos-list .arrow {
+      grid-row: 1;
+      grid-column: 3;
     }
   }
 </style>

@@ -5,37 +5,56 @@ interface Props {
   obra: CollectionEntry<'obras'>;
 }
 const { obra } = Astro.props;
+const href = `/obras/${obra.id}/`;
 ---
 
 <article class="obra-card">
-  <h3>
-    <a href={`/obras/${obra.id}/`}>{obra.data.titulo}</a>
-  </h3>
-  <p class="meta">
-    {obra.data.genero ? `${obra.data.genero} · ` : ''}{obra.data.estado}
-  </p>
-  <p class="sinopsis">{obra.data.sinopsis_corta}</p>
+  <a class="obra-link" href={href} aria-label={`Leer ${obra.data.titulo}`}>
+    <div class="obra-body">
+      <h3>{obra.data.titulo}</h3>
+      <p class="meta">
+        {obra.data.genero ? `${obra.data.genero} · ` : ''}{obra.data.estado}
+      </p>
+      <p class="sinopsis">{obra.data.sinopsis_corta}</p>
+    </div>
+    <span class="cta" aria-hidden="true">Leer <span class="arrow">→</span></span>
+  </a>
 </article>
 
 <style>
   .obra-card {
     border-top: 1px solid var(--color-border);
-    padding: 1.25rem 0;
   }
   .obra-card:last-child {
     border-bottom: 1px solid var(--color-border);
   }
+  /* Toda la tarjeta es clicable: el <a> envuelve el contenido */
+  .obra-link {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem 0.5rem;
+    text-decoration: none;
+    color: var(--color-text);
+    transition: background-color 120ms ease;
+  }
+  .obra-link:hover {
+    background-color: var(--color-bg-soft);
+  }
+  .obra-link:hover h3,
+  .obra-link:hover .cta {
+    color: var(--color-accent);
+  }
+  .obra-link:hover .arrow {
+    transform: translateX(3px);
+  }
+  .obra-body { min-width: 0; }
   .obra-card h3 {
     margin: 0 0 0.25rem;
     font-size: 1.4rem;
     font-weight: 600;
-  }
-  .obra-card h3 a {
-    color: var(--color-text);
-    text-decoration: none;
-  }
-  .obra-card h3 a:hover {
-    color: var(--color-accent);
+    transition: color 120ms ease;
   }
   .obra-card .meta {
     margin: 0 0 0.4rem;
@@ -43,5 +62,26 @@ const { obra } = Astro.props;
   .obra-card .sinopsis {
     margin: 0;
     color: var(--color-text-soft);
+  }
+  .cta {
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-soft);
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+    transition: color 120ms ease;
+  }
+  .arrow {
+    display: inline-block;
+    transition: transform 120ms ease;
+  }
+  @media (max-width: 480px) {
+    .obra-link {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+      padding: 1rem 0.5rem;
+    }
+    .cta { justify-self: end; }
   }
 </style>
